@@ -198,6 +198,10 @@ def apply_styles() -> None:
           text-align: center;
         }
         .hero-text { color: #245245; margin: .4rem 0 0; line-height: 1.45; }
+        .hero-intro {
+          text-align: center;
+          font-size: 1.04rem;
+        }
         .hero-dua {
           margin-top: .8rem;
           padding: .85rem 1rem;
@@ -217,7 +221,7 @@ def apply_styles() -> None:
           text-align: right;
           font-family: 'Noto Naskh Arabic', 'Amiri', serif;
           font-size: 1.07rem;
-          line-height: 1.95;
+          line-height: 2.0;
           color: #153d33;
         }
         .hero-dua-arabic {
@@ -227,8 +231,8 @@ def apply_styles() -> None:
           direction: rtl;
           text-align: right;
           font-family: 'Noto Naskh Arabic', 'Amiri', serif;
-          font-size: 1.12rem;
-          line-height: 2.0;
+          font-size: 1.22rem;
+          line-height: 2.1;
           color: #153d33;
         }
         .cat-box {
@@ -670,16 +674,12 @@ def top_section() -> None:
         """
         <div class="hero">
           <h1 class="hero-title">Tasbeeh Tracker</h1>
-          <p class="hero-text">
+          <p class="hero-text hero-intro">
             For my beloved father <strong>(Muhammad Ashraf)</strong>.<br/>
             May Allah have mercy on him, forgive him, and grant him the highest place in Jannah. Ameen.
           </p>
           <div class="hero-dua">
             <strong>Dua:</strong><br/>
-            Allahummaghfir lahu <strong>(my father Muhammad Ashraf)</strong> warhamhu wa 'afihi wa'fu 'anhu, wa akrim nuzulahu,
-            wa wassi' mudkhalahu, waghsilhu bil-ma'i wath-thalji wal-barad, wa naqqihi minal-khataya kama naqqaytath-thawbal-abyada minad-danas,
-            wa abdilhu daran khayran min darihi, wa ahlan khayran min ahlihi, wa zawjan khayran min zawjihi,
-            wa adkhilhul-jannah, wa a'idhhu min 'adhabil-qabr wa 'adhabin-nar.
             <div class="hero-dua-arabic">
               <strong>العربية:</strong><br/>
               اللَّهُمَّ اغْفِرْ لَهُ (أَبِي مُحَمَّد أَشْرَف) وَارْحَمْهُ، وَعَافِهِ وَاعْفُ عَنْهُ،
