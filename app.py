@@ -90,6 +90,9 @@ HADITH_OPTIONS = [
 def get_conn() -> sqlite3.Connection:
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(DB_PATH, check_same_thread=False)
+    conn.execute("PRAGMA journal_mode=WAL")
+    conn.execute("PRAGMA synchronous=NORMAL")
+    conn.execute("PRAGMA busy_timeout=5000")
     conn.execute(
         """
         CREATE TABLE IF NOT EXISTS contributions (
@@ -151,7 +154,7 @@ def apply_styles() -> None:
     st.markdown(
         """
         <style>
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&family=Noto+Naskh+Arabic:wght@500;600&display=swap');
         .stApp {
           background:
             radial-gradient(circle at 12% 12%, rgba(181, 235, 255, 0.35), rgba(255,255,255,0) 28%),
@@ -236,23 +239,35 @@ def apply_styles() -> None:
         }
         .daily-text {
           color: #224359;
-          line-height: 1.5;
-          font-size: .95rem;
+          line-height: 1.65;
+          font-size: 1rem;
           margin: 0;
         }
         .daily-arabic {
-          font-size: 1.1rem;
-          line-height: 1.9;
+          font-size: 1.28rem;
+          line-height: 2.05;
           color: #102f45;
           direction: rtl;
           text-align: right;
           font-family: 'Noto Naskh Arabic', 'Amiri', serif;
-          margin: .2rem 0 .55rem 0;
+          margin: .3rem 0 .6rem 0;
+          background: rgba(255,255,255,0.28);
+          border: 1px solid rgba(255,255,255,0.4);
+          border-radius: 10px;
+          padding: .55rem .65rem;
         }
         .daily-source {
           margin-top: .45rem;
           font-size: .8rem;
           color: #406177;
+        }
+        .daily-english-label {
+          margin: .45rem 0 .2rem;
+          font-size: .82rem;
+          color: #446279;
+          letter-spacing: .02em;
+          text-transform: uppercase;
+          font-weight: 600;
         }
         .stMetric {
           background: linear-gradient(135deg, rgba(255,255,255,0.34), rgba(255,255,255,0.17));
@@ -417,9 +432,23 @@ def show_reminder(conn: sqlite3.Connection, user_name: str) -> None:
 
 
 def daily_content() -> tuple[dict[str, str], dict[str, str]]:
-    ayah = fetch_ayah_of_day()
-    hadith = fetch_hadith_of_day()
-    return ayah, hadith
+    # Keep daily cards stable during rapid counter clicks; refresh only on demand.
+    if "daily_cards" not in st.session_state:
+        st.session_state.daily_cards = {
+            "ayah": fetch_ayah_of_day(),
+            "hadith": fetch_hadith_of_day(),
+            "loaded_at": datetime.utcnow().isoformat(),
+        }
+    cards = st.session_state.daily_cards
+    return cards["ayah"], cards["hadith"]
+
+
+def refresh_daily_content() -> None:
+    st.session_state.daily_cards = {
+        "ayah": fetch_ayah_of_day(),
+        "hadith": fetch_hadith_of_day(),
+        "loaded_at": datetime.utcnow().isoformat(),
+    }
 
 
 def fetch_json(url: str) -> dict:
@@ -484,11 +513,17 @@ def first_non_empty(obj: dict, keys: list[str]) -> str:
 
 
 def fetch_hadith_of_day() -> dict[str, str]:
-    api_key = str(st.secrets.get("HADITH_API_KEY", DEFAULT_HADITH_API_KEY)).strip()
+    try:
+        api_key = str(st.secrets.get("HADITH_API_KEY", DEFAULT_HADITH_API_KEY)).strip()
+    except Exception:
+        api_key = DEFAULT_HADITH_API_KEY
     if not api_key:
         return random.choice(HADITH_OPTIONS)
 
-    base = str(st.secrets.get("HADITH_API_BASE_URL", "https://hadithapi.com/api")).rstrip("/")
+    try:
+        base = str(st.secrets.get("HADITH_API_BASE_URL", "https://hadithapi.com/api")).rstrip("/")
+    except Exception:
+        base = "https://hadithapi.com/api"
 
     query_sets = [
         {"apiKey": api_key, "paginate": "1"},
@@ -581,6 +616,11 @@ def top_section() -> None:
 
 def front_daily_cards() -> None:
     ayah, hadith = daily_content()
+    top_left, top_right = st.columns([4, 1])
+    with top_right:
+        if st.button("Refresh Daily", use_container_width=True):
+            refresh_daily_content()
+            st.rerun()
     c1, c2 = st.columns(2)
     with c1:
         st.markdown(
@@ -589,6 +629,7 @@ def front_daily_cards() -> None:
                 "<p class='daily-title'>Ayat of the Day</p>"
                 f"<div class='daily-ref'>{escape(ayah.get('ref', 'Quran'))}</div>"
                 f"<p class='daily-arabic'>{escape(ayah.get('arabic', ''))}</p>"
+                "<div class='daily-english-label'>English Translation</div>"
                 f"<p class='daily-text'>{escape(ayah.get('english', ''))}</p>"
                 f"<div class='daily-source'>Source: {escape(ayah.get('source', 'Curated Backup'))}</div>"
                 "</div>"
@@ -602,6 +643,7 @@ def front_daily_cards() -> None:
                 "<p class='daily-title'>Hadees of the Day</p>"
                 f"<div class='daily-ref'>{escape(hadith.get('ref', 'Hadith'))}</div>"
                 f"<p class='daily-arabic'>{escape(hadith.get('arabic', ''))}</p>"
+                "<div class='daily-english-label'>English Translation</div>"
                 f"<p class='daily-text'>{escape(hadith.get('english', ''))}</p>"
                 f"<div class='daily-source'>Source: {escape(hadith.get('source', 'Curated Backup'))}</div>"
                 "</div>"
