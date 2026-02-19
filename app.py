@@ -118,9 +118,10 @@ def apply_styles() -> None:
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap');
         .stApp {
           background:
-            radial-gradient(circle at 0% 0%, rgba(255, 225, 188, 0.56) 0%, rgba(255,255,255,0) 38%),
-            radial-gradient(circle at 100% 0%, rgba(165, 222, 204, 0.45) 0%, rgba(255,255,255,0) 32%),
-            linear-gradient(160deg, #f9f3eb 0%, #f4f8f2 50%, #ecf5fb 100%);
+            radial-gradient(circle at 12% 12%, rgba(181, 235, 255, 0.35), rgba(255,255,255,0) 28%),
+            radial-gradient(circle at 88% 8%, rgba(208, 195, 255, 0.25), rgba(255,255,255,0) 30%),
+            radial-gradient(circle at 80% 82%, rgba(165, 246, 220, 0.22), rgba(255,255,255,0) 34%),
+            linear-gradient(150deg, #dfeaf6 0%, #edf4fb 46%, #e7eef9 100%);
           font-family: 'Inter', sans-serif;
         }
         .block-container {
@@ -129,27 +130,32 @@ def apply_styles() -> None:
           padding-bottom: 2.5rem;
         }
         .hero {
-          background: linear-gradient(135deg, rgba(255,255,255,0.90), rgba(255,251,243,0.92));
-          border: 1px solid rgba(28,36,30,0.15);
+          background: linear-gradient(135deg, rgba(255,255,255,0.33), rgba(255,255,255,0.16));
+          backdrop-filter: blur(20px) saturate(140%);
+          -webkit-backdrop-filter: blur(20px) saturate(140%);
+          border: 1px solid rgba(255,255,255,0.48);
           border-radius: 20px;
           padding: 1.1rem;
           margin-bottom: 1rem;
-          box-shadow: 0 18px 36px rgba(22, 41, 32, 0.08);
+          box-shadow: 0 18px 42px rgba(39, 78, 117, 0.2), inset 0 1px 0 rgba(255,255,255,0.6);
         }
         .hero-title {
-          color: #1b3628;
+          color: #163248;
           font-size: 1.8rem;
           margin: 0;
           font-family: 'Playfair Display', serif;
+          text-shadow: 0 2px 14px rgba(255,255,255,0.5);
         }
-        .hero-text { color: #3d4a43; margin: .4rem 0 0; line-height: 1.45; }
+        .hero-text { color: #1f3d52; margin: .4rem 0 0; line-height: 1.45; }
         .hero-dua {
           margin-top: .8rem;
           padding: .85rem 1rem;
           border-radius: 10px;
-          background: linear-gradient(135deg, #fff9f0, #fffdfa);
-          border: 1px solid #ecd8be;
-          color: #3e342a;
+          background: linear-gradient(135deg, rgba(255,255,255,0.38), rgba(255,255,255,0.18));
+          border: 1px solid rgba(255,255,255,0.54);
+          backdrop-filter: blur(14px);
+          -webkit-backdrop-filter: blur(14px);
+          color: #17354a;
           line-height: 1.55;
         }
         .cat-box {
@@ -163,83 +169,94 @@ def apply_styles() -> None:
         .cat-title { margin: 0; color: #183327; font-size: 1rem; font-weight: 700; }
         .cat-total { margin: .2rem 0 0; color: #51605a; font-size: .9rem; }
         .card {
-          background: rgba(255,255,255,0.82);
-          border: 1px solid rgba(28,36,30,0.12);
+          background: linear-gradient(135deg, rgba(255,255,255,0.35), rgba(255,255,255,0.16));
+          border: 1px solid rgba(255,255,255,0.45);
           border-radius: 12px;
           padding: .8rem;
+          backdrop-filter: blur(14px);
+          -webkit-backdrop-filter: blur(14px);
+          box-shadow: 0 10px 28px rgba(45, 84, 120, 0.16);
         }
         .daily-card {
-          background: linear-gradient(135deg, rgba(255,255,255,0.92), rgba(255,250,242,0.90));
-          border: 1px solid rgba(28,36,30,0.14);
+          background: linear-gradient(135deg, rgba(255,255,255,0.38), rgba(255,255,255,0.18));
+          border: 1px solid rgba(255,255,255,0.5);
           border-radius: 14px;
           padding: 1rem;
           min-height: 170px;
-          box-shadow: 0 10px 20px rgba(25, 42, 33, 0.06);
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
+          box-shadow: 0 12px 30px rgba(44, 82, 119, 0.19), inset 0 1px 0 rgba(255,255,255,0.6);
         }
         .daily-title {
           margin: 0 0 .4rem 0;
-          color: #1f3b2e;
+          color: #17354a;
           font-size: 1rem;
           font-weight: 700;
         }
         .daily-ref {
-          color: #5a655f;
+          color: #32536a;
           font-size: .88rem;
           margin-bottom: .4rem;
         }
         .daily-text {
-          color: #37433e;
+          color: #224359;
           line-height: 1.5;
           font-size: .95rem;
           margin: 0;
         }
         .stMetric {
-          background: rgba(255,255,255,0.82);
-          border: 1px solid rgba(28,36,30,0.14);
+          background: linear-gradient(135deg, rgba(255,255,255,0.34), rgba(255,255,255,0.17));
+          border: 1px solid rgba(255,255,255,0.52);
           border-radius: 12px;
           padding: 8px;
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
         }
         .stButton > button {
           border-radius: 12px !important;
-          border: 1px solid rgba(35,67,50,0.12) !important;
+          border: 1px solid rgba(255,255,255,0.45) !important;
           font-weight: 600 !important;
-          background: linear-gradient(135deg, #2f7a57, #3f9169) !important;
+          background: linear-gradient(135deg, rgba(42, 121, 166, 0.76), rgba(73, 112, 199, 0.72)) !important;
           color: #fff !important;
-          box-shadow: 0 10px 18px rgba(33, 93, 67, 0.28) !important;
+          box-shadow: 0 10px 24px rgba(57, 94, 164, 0.33) !important;
           transition: transform .15s ease, box-shadow .15s ease !important;
         }
         .stButton > button:hover {
           transform: translateY(-1px);
-          box-shadow: 0 12px 22px rgba(33, 93, 67, 0.34) !important;
+          box-shadow: 0 14px 26px rgba(57, 94, 164, 0.42) !important;
         }
         .deed-chip {
-          border: 1px solid rgba(35,67,50,0.12);
+          border: 1px solid rgba(255,255,255,0.45);
           border-radius: 14px;
-          background: linear-gradient(145deg, rgba(255,255,255,0.91), rgba(253,255,251,0.74));
+          background: linear-gradient(145deg, rgba(255,255,255,0.34), rgba(255,255,255,0.16));
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
           padding: .6rem .72rem;
           margin-bottom: .4rem;
           min-height: 78px;
-          box-shadow: 0 10px 20px rgba(23, 45, 35, 0.06);
+          box-shadow: 0 10px 24px rgba(45, 84, 120, 0.18);
         }
         .deed-chip-title {
           font-size: .95rem;
-          color: #203b2d;
+          color: #173950;
           margin: 0;
           font-weight: 700;
         }
         .deed-chip-total {
-          color: #5b6963;
+          color: #35526a;
           margin: .2rem 0 0;
           font-size: .88rem;
         }
         [data-baseweb="tab-list"] {
           gap: 0.35rem;
-          background: rgba(255,255,255,0.75);
-          border: 1px solid rgba(38,66,50,0.12);
+          background: linear-gradient(135deg, rgba(255,255,255,0.30), rgba(255,255,255,0.14));
+          border: 1px solid rgba(255,255,255,0.44);
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
           border-radius: 14px;
           padding: .36rem;
           width: fit-content;
-          box-shadow: 0 8px 16px rgba(22, 42, 33, 0.08);
+          box-shadow: 0 12px 24px rgba(45, 84, 120, 0.2);
         }
         [data-baseweb="tab"] {
           border-radius: 10px !important;
