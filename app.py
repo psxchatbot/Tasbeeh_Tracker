@@ -13,14 +13,13 @@ DB_PATH = Path(__file__).parent / "data" / "tasbeeh_tracker.db"
 NAME_COOKIE = "tasbeeh_display_name"
 ACCESS_COOKIE = "tasbeeh_access_ok"
 
-CATEGORIES = [
-    "Tasbeeh",
+DEED_CATEGORIES = [
     "Zikr",
     "Quran Recitation / Verses",
     "Ahadith",
     "Other Good Deeds",
-    "Sadaqah",
 ]
+SADAQAH_CATEGORY = "Sadaqah"
 
 AYAT_OPTIONS = [
     {"ref": "Qur'an 2:286", "text": "Allah does not burden a soul beyond that it can bear."},
@@ -262,11 +261,12 @@ def fetch_df(conn: sqlite3.Connection) -> pd.DataFrame:
 
 
 def category_count_map(df: pd.DataFrame) -> dict[str, int]:
+    all_categories = DEED_CATEGORIES + [SADAQAH_CATEGORY]
     if df.empty:
-        return {cat: 0 for cat in CATEGORIES}
+        return {cat: 0 for cat in all_categories}
     summary = df.groupby("category", as_index=False)["count"].sum()
     counts = {row["category"]: int(row["count"]) for _, row in summary.iterrows()}
-    return {cat: counts.get(cat, 0) for cat in CATEGORIES}
+    return {cat: counts.get(cat, 0) for cat in all_categories}
 
 
 def get_pref(conn: sqlite3.Connection, user_name: str) -> tuple[str, str]:
@@ -337,79 +337,64 @@ def top_section() -> None:
     )
 
 
-def quick_add_section(conn: sqlite3.Connection, user_name: str, df: pd.DataFrame) -> None:
-    st.subheader("Quick Add (Collective)")
-    st.caption("Tap one button per category. Each tap adds +1.")
+def deeds_tab(conn: sqlite3.Connection, user_name: str, df: pd.DataFrame) -> None:
+    st.subheader("Collective Deeds")
+    st.caption("Single graph above, quick +1 buttons below each category.")
 
     counts = category_count_map(df)
-    max_total = max(max(counts.values()), 1)
+    deed_totals = [counts.get(cat, 0) for cat in DEED_CATEGORIES]
 
     chart_rows = pd.DataFrame(
-        {"Category": CATEGORIES, "Total": [counts[cat] for cat in CATEGORIES]}
+        {"Category": DEED_CATEGORIES, "Total": deed_totals}
     ).set_index("Category")
     st.bar_chart(chart_rows, y="Total", use_container_width=True)
 
-    for i in range(0, len(CATEGORIES), 2):
-        row_cats = CATEGORIES[i : i + 2]
-        cols = st.columns(len(row_cats))
-        for col, category in zip(cols, row_cats):
-            with col:
-                st.markdown(
-                    "<div class='cat-box'>"
-                    f"<p class='cat-title'>{category}</p>"
-                    f"<p class='cat-total'>Total: {counts.get(category, 0)}</p>"
-                    "</div>",
-                    unsafe_allow_html=True,
-                )
-                st.progress(min(counts.get(category, 0) / max_total, 1.0))
-                if st.button(f"+1 {category}", key=f"btn-{category}", use_container_width=True):
-                    add_entry(conn, user_name, category, 1, 0, "")
-                    st.rerun()
+    cols = st.columns(len(DEED_CATEGORIES))
+    for col, category in zip(cols, DEED_CATEGORIES):
+        with col:
+            st.markdown(
+                "<div class='cat-box'>"
+                f"<p class='cat-title'>{category}</p>"
+                f"<p class='cat-total'>Counter: {counts.get(category, 0)}</p>"
+                "</div>",
+                unsafe_allow_html=True,
+            )
+            if st.button("+1", key=f"btn-{category}", use_container_width=True):
+                add_entry(conn, user_name, category, 1, 0, "")
+                st.rerun()
 
-    st.markdown("### Add Sadaqah (PKR)")
+
+def sadaqah_tab(conn: sqlite3.Connection, user_name: str, df: pd.DataFrame) -> None:
+    st.subheader("Sadaqah")
+
+    counts = category_count_map(df)
+    sadaqah_count = counts.get(SADAQAH_CATEGORY, 0)
+    total_pkr = int(df.loc[df["category"] == SADAQAH_CATEGORY, "amount_pkr"].sum()) if not df.empty else 0
+
+    graph_df = pd.DataFrame(
+        {"Metric": ["Sadaqah Entries", "Sadaqah PKR"], "Value": [sadaqah_count, total_pkr]}
+    ).set_index("Metric")
+    st.bar_chart(graph_df, y="Value", use_container_width=True)
+
+    m1, m2 = st.columns(2)
+    m1.metric("Sadaqah Entries", f"{sadaqah_count}")
+    m2.metric("Total Sadaqah (PKR)", f"{total_pkr:,}")
+
     with st.form("sadaqah-pkr-form", clear_on_submit=True):
-        amount_pkr = st.number_input(
-            "Amount (PKR)",
-            min_value=1,
-            max_value=100000000,
-            value=100,
-            step=50,
-        )
+        amount_pkr = st.number_input("Amount (PKR)", min_value=1, max_value=100000000, value=100, step=50)
         note = st.text_input("Optional note")
-        submitted = st.form_submit_button("Add Sadaqah PKR", use_container_width=True)
+        submitted = st.form_submit_button("Add Sadaqah", use_container_width=True)
         if submitted:
-            add_entry(conn, user_name, "Sadaqah", 1, int(amount_pkr), note)
+            add_entry(conn, user_name, SADAQAH_CATEGORY, 1, int(amount_pkr), note)
             st.success("Sadaqah added.")
             st.rerun()
 
 
-def dashboard_section(df: pd.DataFrame) -> None:
-    st.subheader("Collective Dashboard")
+def activity_section(df: pd.DataFrame) -> None:
+    st.subheader("Recent Collective Activity")
     if df.empty:
-        st.info("No entries yet. Add the first contribution above.")
+        st.info("No entries yet.")
         return
-
-    total_count = int(df["count"].sum())
-    total_sadaqah_pkr = int(df["amount_pkr"].sum())
-    today_utc = datetime.utcnow().date().isoformat()
-    today_count = int(df[df["created_at"].str.startswith(today_utc)]["count"].sum())
-
-    m1, m2, m3 = st.columns(3)
-    m1.metric("Collective Total", f"{total_count}")
-    m2.metric("Sadaqah (PKR)", f"{total_sadaqah_pkr:,}")
-    m3.metric("Today Added", f"{today_count}")
-
-    summary = (
-        df.groupby("category", as_index=False)[["count", "amount_pkr"]]
-        .sum()
-        .sort_values("count", ascending=False)
-    )
-    summary["amount_pkr"] = summary["amount_pkr"].astype(int)
-
-    st.markdown("#### Category Progress")
-    st.bar_chart(summary.set_index("category"), y="count", use_container_width=True)
-
-    st.markdown("#### Recent Collective Activity")
     recent = df[["created_at", "category", "count", "amount_pkr", "note"]].copy()
     recent["created_at"] = pd.to_datetime(recent["created_at"], utc=True).dt.strftime("%Y-%m-%d %H:%M UTC")
     st.dataframe(recent.head(20), use_container_width=True, hide_index=True)
@@ -452,14 +437,15 @@ def main() -> None:
     top_section()
     show_reminder(conn, user_name)
     df = fetch_df(conn)
-
-    quick_add_section(conn, user_name, df)
-    st.divider()
-    dashboard_section(fetch_df(conn))
-
-    with st.expander("Daily Content", expanded=False):
+    tabs = st.tabs(["Deeds", "Sadaqah", "Daily Content", "Settings"])
+    with tabs[0]:
+        deeds_tab(conn, user_name, df)
+        activity_section(fetch_df(conn))
+    with tabs[1]:
+        sadaqah_tab(conn, user_name, fetch_df(conn))
+    with tabs[2]:
         inspiration_section()
-    with st.expander("Settings", expanded=False):
+    with tabs[3]:
         settings_section(conn, user_name)
 
 
