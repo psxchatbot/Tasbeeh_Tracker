@@ -25,6 +25,12 @@ DEED_CATEGORIES = [
     "Other Good Deeds",
 ]
 SADAQAH_CATEGORY = "Sadaqah"
+CATEGORY_LABELS = {
+    "Zikr": "Zikr",
+    "Quran Recitation / Verses": "Quran Recitation",
+    "Ahadith": "Ahadith",
+    "Other Good Deeds": "Good Deeds",
+}
 CATEGORY_META = {
     "Zikr": {"icon": "🕊️", "color": "#1F7A5C"},
     "Quran Recitation / Verses": {"icon": "📖", "color": "#2F8E6C"},
@@ -597,7 +603,7 @@ def top_section() -> None:
     st.markdown(
         """
         <div class="hero">
-          <h1 class="hero-title">تسبیح ٹریکر</h1>
+          <h1 class="hero-title">Tasbeeh Tracker</h1>
           <p class="hero-text">
             For our beloved father <strong>Muhammad Ashraf</strong>.<br/>
             May Allah have mercy on him, forgive him, and grant him the highest place in Jannah. Ameen.
@@ -678,13 +684,18 @@ def deeds_tab(conn: sqlite3.Connection, user_name: str, df: pd.DataFrame) -> Non
     chart_rows = pd.DataFrame(
         {
             "Category": DEED_CATEGORIES,
+            "Label": [CATEGORY_LABELS[c] for c in DEED_CATEGORIES],
             "Total": deed_totals,
             "Color": [CATEGORY_META[c]["color"] for c in DEED_CATEGORIES],
         }
     )
     hover = alt.selection_point(on="mouseover", fields=["Category"], empty=True)
     bar = alt.Chart(chart_rows).mark_bar(cornerRadiusTopLeft=6, cornerRadiusTopRight=6).encode(
-        x=alt.X("Category:N", sort=DEED_CATEGORIES, axis=alt.Axis(labelAngle=0, title=None)),
+        x=alt.X(
+            "Label:N",
+            sort=[CATEGORY_LABELS[c] for c in DEED_CATEGORIES],
+            axis=alt.Axis(labelAngle=0, title=None, labelLimit=220),
+        ),
         y=alt.Y("Total:Q", title=None, axis=alt.Axis(grid=True)),
         color=alt.Color("Color:N", scale=None, legend=None),
         opacity=alt.condition(hover, alt.value(1.0), alt.value(0.85)),
@@ -693,7 +704,7 @@ def deeds_tab(conn: sqlite3.Connection, user_name: str, df: pd.DataFrame) -> Non
     labels = alt.Chart(chart_rows).mark_text(
         align="center", baseline="bottom", dy=-4, color="#1b3628", fontWeight="bold"
     ).encode(
-        x=alt.X("Category:N", sort=DEED_CATEGORIES),
+        x=alt.X("Label:N", sort=[CATEGORY_LABELS[c] for c in DEED_CATEGORIES]),
         y=alt.Y("Total:Q"),
         text=alt.Text("Total:Q"),
     )
