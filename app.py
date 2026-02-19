@@ -204,6 +204,17 @@ def apply_styles() -> None:
           color: #20473d;
           line-height: 1.55;
         }
+        .hero-dua-urdu {
+          margin-top: .65rem;
+          padding-top: .55rem;
+          border-top: 1px dashed rgba(255,255,255,0.55);
+          direction: rtl;
+          text-align: right;
+          font-family: 'Noto Naskh Arabic', 'Amiri', serif;
+          font-size: 1.07rem;
+          line-height: 1.95;
+          color: #153d33;
+        }
         .cat-box {
           background: rgba(255,255,255,0.86);
           border: 1px solid rgba(27,54,40,0.14);
@@ -621,15 +632,22 @@ def top_section() -> None:
         <div class="hero">
           <h1 class="hero-title">Tasbeeh Tracker</h1>
           <p class="hero-text">
-            For our beloved father <strong>Muhammad Ashraf</strong>.<br/>
+            For my beloved father <strong>(Muhammad Ashraf)</strong>.<br/>
             May Allah have mercy on him, forgive him, and grant him the highest place in Jannah. Ameen.
           </p>
           <div class="hero-dua">
             <strong>Dua:</strong><br/>
-            O Allah, forgive Muhammad Ashraf completely, elevate his rank among the righteous, expand and illuminate his grave,
+            O Allah, forgive my father <strong>(Muhammad Ashraf)</strong> completely, elevate his rank among the righteous, expand and illuminate his grave,
             replace his shortcomings with Your mercy, and grant him ease on the Day of Judgment.<br/>
             O Allah, accept every tasbeeh, recitation, charity, and dua we do as sadaqah jariyah for him, and unite us with him
             in Jannat al-Firdaws without reckoning. Ameen.
+            <div class="hero-dua-urdu">
+              <strong>اردو ترجمہ:</strong><br/>
+              اے اللہ! میرے والد <strong>(محمد اشرف)</strong> کی مکمل مغفرت فرما، نیک لوگوں میں ان کے درجات بلند فرما،
+              ان کی قبر کو کشادہ اور منور فرما، ان کی کوتاہیوں کو اپنی رحمت سے بدل دے، اور قیامت کے دن انہیں آسانی عطا فرما۔<br/>
+              اے اللہ! ہم جو تسبیح، تلاوت، صدقہ اور دعا کرتے ہیں اسے ان کے لیے صدقۂ جاریہ قبول فرما،
+              اور ہمیں ان کے ساتھ جنت الفردوس میں بغیر حساب جمع فرما۔ آمین۔
+            </div>
           </div>
         </div>
         """,
