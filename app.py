@@ -179,11 +179,12 @@ def apply_styles() -> None:
           box-shadow: 0 18px 42px rgba(39, 78, 117, 0.2), inset 0 1px 0 rgba(255,255,255,0.6);
         }
         .hero-title {
-          color: #173f35;
+          color: #2b6ea3;
           font-size: 1.8rem;
           margin: 0;
           font-family: 'Playfair Display', serif;
           text-shadow: 0 2px 14px rgba(255,255,255,0.5);
+          text-align: center;
         }
         .hero-text { color: #245245; margin: .4rem 0 0; line-height: 1.45; }
         .hero-dua {
@@ -596,7 +597,7 @@ def top_section() -> None:
     st.markdown(
         """
         <div class="hero">
-          <h1 class="hero-title">Tasbeeh Tracker</h1>
+          <h1 class="hero-title">تسبیح ٹریکر</h1>
           <p class="hero-text">
             For our beloved father <strong>Muhammad Ashraf</strong>.<br/>
             May Allah have mercy on him, forgive him, and grant him the highest place in Jannah. Ameen.
