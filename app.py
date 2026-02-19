@@ -21,6 +21,12 @@ DEED_CATEGORIES = [
     "Other Good Deeds",
 ]
 SADAQAH_CATEGORY = "Sadaqah"
+CATEGORY_META = {
+    "Zikr": {"icon": "🕊️", "color": "#2f7a57"},
+    "Quran Recitation / Verses": {"icon": "📖", "color": "#3f8f74"},
+    "Ahadith": {"icon": "🌙", "color": "#4d9687"},
+    "Other Good Deeds": {"icon": "🤲", "color": "#5da18f"},
+}
 
 AYAT_OPTIONS = [
     {"ref": "Qur'an 2:286", "text": "Allah does not burden a soul beyond that it can bear."},
@@ -158,6 +164,30 @@ def apply_styles() -> None:
           border: 1px solid rgba(28,36,30,0.14);
           border-radius: 12px;
           padding: 8px;
+        }
+        .stButton > button {
+          border-radius: 10px !important;
+          border: 1px solid rgba(35,67,50,0.16) !important;
+          font-weight: 600 !important;
+        }
+        .deed-chip {
+          border: 1px solid rgba(35,67,50,0.14);
+          border-radius: 10px;
+          background: rgba(255,255,255,0.78);
+          padding: .55rem .7rem;
+          margin-bottom: .4rem;
+          min-height: 78px;
+        }
+        .deed-chip-title {
+          font-size: .95rem;
+          color: #203b2d;
+          margin: 0;
+          font-weight: 700;
+        }
+        .deed-chip-total {
+          color: #5b6963;
+          margin: .2rem 0 0;
+          font-size: .88rem;
         }
         @media (max-width: 768px) {
           .hero-title { font-size: 1.35rem; }
@@ -340,18 +370,41 @@ def top_section() -> None:
 
 def deeds_tab(conn: sqlite3.Connection, user_name: str, df: pd.DataFrame) -> None:
     st.subheader("Collective Deeds")
-    st.caption("Press +1 below each category. Chart updates instantly.")
+    st.caption("Choose step size, then tap category button. Chart updates instantly.")
 
     counts = category_count_map(df)
     deed_totals = [counts.get(cat, 0) for cat in DEED_CATEGORIES]
+    today_utc = datetime.utcnow().date().isoformat()
+    today_total = int(df[df["created_at"].str.startswith(today_utc)]["count"].sum()) if not df.empty else 0
+    all_total = int(sum(deed_totals))
 
-    chart_rows = pd.DataFrame({"Category": DEED_CATEGORIES, "Total": deed_totals})
+    m1, m2 = st.columns(2)
+    m1.metric("Total Deeds", all_total)
+    m2.metric("Added Today", today_total)
+
+    step = st.radio(
+        "Tap increment",
+        options=[1, 3, 5],
+        horizontal=True,
+        index=0,
+        format_func=lambda x: f"+{x}",
+    )
+
+    chart_rows = pd.DataFrame(
+        {
+            "Category": DEED_CATEGORIES,
+            "Total": deed_totals,
+            "Color": [CATEGORY_META[c]["color"] for c in DEED_CATEGORIES],
+        }
+    )
+    hover = alt.selection_point(on="mouseover", fields=["Category"], empty=True)
     bar = alt.Chart(chart_rows).mark_bar(cornerRadiusTopLeft=6, cornerRadiusTopRight=6).encode(
         x=alt.X("Category:N", sort=DEED_CATEGORIES, axis=alt.Axis(labelAngle=0, title=None)),
         y=alt.Y("Total:Q", title=None),
-        color=alt.value("#2f7a57"),
+        color=alt.Color("Color:N", scale=None, legend=None),
+        opacity=alt.condition(hover, alt.value(1.0), alt.value(0.85)),
         tooltip=["Category", "Total"],
-    )
+    ).add_params(hover)
     labels = alt.Chart(chart_rows).mark_text(
         align="center", baseline="bottom", dy=-4, color="#1b3628", fontWeight="bold"
     ).encode(
@@ -364,10 +417,17 @@ def deeds_tab(conn: sqlite3.Connection, user_name: str, df: pd.DataFrame) -> Non
     cols = st.columns(len(DEED_CATEGORIES))
     for col, category in zip(cols, DEED_CATEGORIES):
         with col:
-            st.markdown(f"**{category}**")
-            st.caption(f"Total: {counts.get(category, 0)}")
-            if st.button("+1", key=f"btn-{category}", use_container_width=True):
-                add_entry(conn, user_name, category, 1, 0, "")
+            icon = CATEGORY_META[category]["icon"]
+            st.markdown(
+                "<div class='deed-chip'>"
+                f"<p class='deed-chip-title'>{icon} {category}</p>"
+                f"<p class='deed-chip-total'>Total: {counts.get(category, 0)}</p>"
+                "</div>",
+                unsafe_allow_html=True,
+            )
+            if st.button(f"+{step}", key=f"btn-{category}", use_container_width=True):
+                add_entry(conn, user_name, category, int(step), 0, "")
+                st.toast(f"{icon} {category} +{step}")
                 st.rerun()
 
 
