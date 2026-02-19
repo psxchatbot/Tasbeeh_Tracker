@@ -43,6 +43,9 @@ streamlit run app.py
 
 ```toml
 FAMILY_ACCESS_CODE = "your-private-code"
+HADITH_API_KEY = "your-hadithapi-key"
+# Optional override:
+# HADITH_API_BASE_URL = "https://hadithapi.com/api"
 ```
 
 ## Notes

@@ -2,7 +2,11 @@ from __future__ import annotations
 
 import sqlite3
 from datetime import date, datetime, timedelta
+import json
 from pathlib import Path
+from urllib.error import URLError
+from urllib.parse import urlencode
+from urllib.request import urlopen
 
 import altair as alt
 import extra_streamlit_components as stx
@@ -414,9 +418,107 @@ def show_reminder(conn: sqlite3.Connection, user_name: str) -> None:
 
 
 def daily_content() -> tuple[dict[str, str], dict[str, str]]:
+    ayah = fetch_ayah_of_day()
+    hadith = fetch_hadith_of_day()
+    return ayah, hadith
+
+
+def fetch_json(url: str) -> dict:
+    try:
+        with urlopen(url, timeout=10) as response:
+            return json.loads(response.read().decode("utf-8"))
+    except (URLError, TimeoutError, json.JSONDecodeError):
+        return {}
+
+
+def fetch_ayah_of_day() -> dict[str, str]:
+    # 1..6236 keeps daily selection deterministic.
+    ayah_number = (date.today().toordinal() % 6236) + 1
+    url = f"https://api.alquran.cloud/v1/ayah/{ayah_number}/en.asad"
+    payload = fetch_json(url)
+    data = payload.get("data", {}) if isinstance(payload, dict) else {}
+    text = str(data.get("text", "")).strip()
+    surah = data.get("surah", {}) if isinstance(data.get("surah", {}), dict) else {}
+    surah_no = surah.get("number")
+    ayah_in_surah = data.get("numberInSurah")
+    if text and surah_no and ayah_in_surah:
+        return {
+            "ref": f"Qur'an {surah_no}:{ayah_in_surah}",
+            "text": text,
+        }
+
     idx_ayah = date.today().toordinal() % len(AYAT_OPTIONS)
+    return AYAT_OPTIONS[idx_ayah]
+
+
+def first_non_empty(obj: dict, keys: list[str]) -> str:
+    for key in keys:
+        value = obj.get(key)
+        if isinstance(value, str) and value.strip():
+            return value.strip()
+    return ""
+
+
+def fetch_hadith_of_day() -> dict[str, str]:
+    api_key = str(st.secrets.get("HADITH_API_KEY", "")).strip()
+    if not api_key:
+        idx_hadith = (date.today().toordinal() * 3) % len(HADITH_OPTIONS)
+        return HADITH_OPTIONS[idx_hadith]
+
+    base = str(st.secrets.get("HADITH_API_BASE_URL", "https://hadithapi.com/api")).rstrip("/")
+
+    query_sets = [
+        {"apiKey": api_key, "paginate": "1"},
+        {"api_key": api_key, "paginate": "1"},
+        {"apiKey": api_key},
+        {"api_key": api_key},
+    ]
+    paths = ["/hadiths", "/hadith", "/books"]
+
+    for path in paths:
+        for query in query_sets:
+            url = f"{base}{path}?{urlencode(query)}"
+            payload = fetch_json(url)
+            if not isinstance(payload, dict):
+                continue
+
+            data = payload.get("hadiths") or payload.get("data") or payload.get("hadith")
+            entries = []
+            if isinstance(data, dict):
+                if isinstance(data.get("data"), list):
+                    entries = data.get("data", [])
+                else:
+                    entries = [data]
+            elif isinstance(data, list):
+                entries = data
+
+            entries = [e for e in entries if isinstance(e, dict)]
+            if not entries:
+                continue
+
+            idx = date.today().toordinal() % len(entries)
+            chosen = entries[idx]
+            text = first_non_empty(
+                chosen,
+                [
+                    "hadithEnglish",
+                    "hadith_english",
+                    "englishNarrator",
+                    "text",
+                    "hadithUrdu",
+                    "hadith_ar",
+                ],
+            )
+            source = first_non_empty(
+                chosen,
+                ["book", "bookName", "collection", "source", "chapterEnglish"],
+            ) or "Hadith API"
+
+            if text:
+                return {"ref": source, "text": text}
+
     idx_hadith = (date.today().toordinal() * 3) % len(HADITH_OPTIONS)
-    return AYAT_OPTIONS[idx_ayah], HADITH_OPTIONS[idx_hadith]
+    return HADITH_OPTIONS[idx_hadith]
 
 
 def top_section() -> None:
