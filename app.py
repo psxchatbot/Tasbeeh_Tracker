@@ -40,24 +40,28 @@ AYAT_OPTIONS = [
         "ref": "Qur'an 2:286",
         "arabic": "لَا يُكَلِّفُ اللَّهُ نَفْسًا إِلَّا وُسْعَهَا",
         "english": "Allah does not burden a soul beyond that it can bear.",
+        "urdu": "اللہ کسی جان پر اس کی طاقت سے بڑھ کر بوجھ نہیں ڈالتا۔",
         "source": "Curated Backup",
     },
     {
         "ref": "Qur'an 13:28",
         "arabic": "أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ",
         "english": "Verily, in the remembrance of Allah do hearts find rest.",
+        "urdu": "خبردار! اللہ کے ذکر ہی سے دلوں کو اطمینان حاصل ہوتا ہے۔",
         "source": "Curated Backup",
     },
     {
         "ref": "Qur'an 94:5-6",
         "arabic": "فَإِنَّ مَعَ الْعُسْرِ يُسْرًا ۝ إِنَّ مَعَ الْعُسْرِ يُسْرًا",
         "english": "Indeed, with hardship comes ease. Indeed, with hardship comes ease.",
+        "urdu": "پس بے شک مشکل کے ساتھ آسانی ہے، بے شک مشکل کے ساتھ آسانی ہے۔",
         "source": "Curated Backup",
     },
     {
         "ref": "Qur'an 14:7",
         "arabic": "لَئِن شَكَرْتُمْ لَأَزِيدَنَّكُمْ",
         "english": "If you are grateful, I will surely increase you.",
+        "urdu": "اگر تم شکر کرو گے تو میں تمہیں اور زیادہ دوں گا۔",
         "source": "Curated Backup",
     },
 ]
@@ -67,24 +71,28 @@ HADITH_OPTIONS = [
         "ref": "Sahih Bukhari & Sahih Muslim",
         "arabic": "إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ",
         "english": "Actions are judged by intentions.",
+        "urdu": "اعمال کا دارومدار نیتوں پر ہے۔",
         "source": "Curated Backup",
     },
     {
         "ref": "Sahih Bukhari & Sahih Muslim",
         "arabic": "مَنْ كَانَ يُؤْمِنُ بِاللَّهِ وَالْيَوْمِ الآخِرِ فَلْيَقُلْ خَيْرًا أَوْ لِيَصْمُتْ",
         "english": "Whoever believes in Allah and the Last Day should speak good or remain silent.",
+        "urdu": "جو اللہ اور آخرت کے دن پر ایمان رکھتا ہے وہ بھلائی کی بات کرے یا خاموش رہے۔",
         "source": "Curated Backup",
     },
     {
         "ref": "Sahih Muslim",
         "arabic": "لَا يُؤْمِنُ أَحَدُكُمْ حَتَّى يُحِبَّ لِأَخِيهِ مَا يُحِبُّ لِنَفْسِهِ",
         "english": "None of you truly believes until he loves for his brother what he loves for himself.",
+        "urdu": "تم میں سے کوئی کامل مومن نہیں جب تک اپنے بھائی کے لیے وہی پسند نہ کرے جو اپنے لیے پسند کرتا ہے۔",
         "source": "Curated Backup",
     },
     {
         "ref": "Sahih Bukhari & Sahih Muslim",
         "arabic": "لَيْسَ الشَّدِيدُ بِالصُّرَعَةِ، إِنَّمَا الشَّدِيدُ الَّذِي يَمْلِكُ نَفْسَهُ عِنْدَ الغَضَبِ",
         "english": "The strong person is the one who controls himself when angry.",
+        "urdu": "طاقتور وہ نہیں جو کشتی میں غالب آئے، طاقتور وہ ہے جو غصے کے وقت اپنے آپ کو قابو میں رکھے۔",
         "source": "Curated Backup",
     },
 ]
@@ -484,14 +492,16 @@ def fetch_json(url: str) -> dict:
 def fetch_ayah_of_day() -> dict[str, str]:
     # Random ayah on each app load.
     ayah_number = random.SystemRandom().randint(1, 6236)
-    url = f"https://api.alquran.cloud/v1/ayah/{ayah_number}/editions/quran-uthmani,en.asad"
+    url = f"https://api.alquran.cloud/v1/ayah/{ayah_number}/editions/quran-uthmani,en.asad,ur.jalandhry"
     payload = fetch_json(url)
     data = payload.get("data", []) if isinstance(payload, dict) else []
     if isinstance(data, list) and len(data) >= 2:
         ar_data = data[0] if isinstance(data[0], dict) else {}
         en_data = data[1] if isinstance(data[1], dict) else {}
+        ur_data = data[2] if len(data) > 2 and isinstance(data[2], dict) else {}
         arabic = str(ar_data.get("text", "")).strip()
         english = str(en_data.get("text", "")).strip()
+        urdu = str(ur_data.get("text", "")).strip()
         surah = ar_data.get("surah", {}) if isinstance(ar_data.get("surah", {}), dict) else {}
         surah_no = surah.get("number")
         ayah_in_surah = ar_data.get("numberInSurah")
@@ -500,18 +510,23 @@ def fetch_ayah_of_day() -> dict[str, str]:
                 "ref": f"Qur'an {surah_no}:{ayah_in_surah}",
                 "arabic": arabic,
                 "english": english,
+                "urdu": urdu or "",
                 "source": "AlQuran.cloud",
             }
 
     # Fallback path for single-edition responses
     single_url_ar = f"https://api.alquran.cloud/v1/ayah/{ayah_number}/quran-uthmani"
     single_url_en = f"https://api.alquran.cloud/v1/ayah/{ayah_number}/en.asad"
+    single_url_ur = f"https://api.alquran.cloud/v1/ayah/{ayah_number}/ur.jalandhry"
     ar_payload = fetch_json(single_url_ar)
     en_payload = fetch_json(single_url_en)
+    ur_payload = fetch_json(single_url_ur)
     ar_data = ar_payload.get("data", {}) if isinstance(ar_payload, dict) else {}
     en_data = en_payload.get("data", {}) if isinstance(en_payload, dict) else {}
+    ur_data = ur_payload.get("data", {}) if isinstance(ur_payload, dict) else {}
     arabic = str(ar_data.get("text", "")).strip()
     english = str(en_data.get("text", "")).strip()
+    urdu = str(ur_data.get("text", "")).strip()
     surah = ar_data.get("surah", {}) if isinstance(ar_data.get("surah", {}), dict) else {}
     surah_no = surah.get("number")
     ayah_in_surah = ar_data.get("numberInSurah")
@@ -520,6 +535,7 @@ def fetch_ayah_of_day() -> dict[str, str]:
             "ref": f"Qur'an {surah_no}:{ayah_in_surah}",
             "arabic": arabic,
             "english": english,
+            "urdu": urdu or "",
             "source": "AlQuran.cloud",
         }
 
@@ -615,10 +631,25 @@ def fetch_hadith_of_day() -> dict[str, str]:
                     "hadithArabicText",
                 ],
             )
+            urdu = first_non_empty(
+                chosen,
+                [
+                    "hadithUrdu",
+                    "hadith_urdu",
+                    "text_ur",
+                    "urduNarrator",
+                ],
+            )
             source = hadith_source_label(chosen)
 
             if english and arabic:
-                return {"ref": source, "arabic": arabic, "english": english, "source": "HadithAPI"}
+                return {
+                    "ref": source,
+                    "arabic": arabic,
+                    "english": english,
+                    "urdu": urdu or "",
+                    "source": "HadithAPI",
+                }
 
     return random.choice(HADITH_OPTIONS)
 
@@ -674,6 +705,8 @@ def front_daily_cards() -> None:
             ),
             unsafe_allow_html=True,
         )
+        with st.expander("اردو ترجمہ ▾", expanded=False):
+            st.markdown(ayah.get("urdu", "") or "اردو ترجمہ دستیاب نہیں۔")
     with c2:
         st.markdown(
             (
@@ -688,6 +721,8 @@ def front_daily_cards() -> None:
             ),
             unsafe_allow_html=True,
         )
+        with st.expander("اردو ترجمہ ▾", expanded=False):
+            st.markdown(hadith.get("urdu", "") or "اردو ترجمہ دستیاب نہیں۔")
 
 
 def deeds_tab(conn: sqlite3.Connection, user_name: str, df: pd.DataFrame) -> None:
