@@ -1,8 +1,28 @@
-# Tasbeeh Tracker
+# Tasbeeh Tracker (Family)
 
-Shared Streamlit app for 3-4 siblings to log recitation, sadaqa, dua, and good deeds.
+A private family Streamlit app for collective deeds in memory of **Muhammad Ashraf**.
 
-## Run locally
+## Features
+
+- Memorial opening message for your father
+- Mobile-friendly layout
+- One-time name save per device (cookie-based)
+- Shared family code protection (optional)
+- Collective counters only (no per-user public breakdown)
+- Category logging tabs:
+  - Tasbeeh
+  - Zikr
+  - Quran Recitation / Verses
+  - Ahadith
+  - Other Good Deeds
+  - Sadaqah (PKR amount)
+- Daily Islamic content:
+  - Ayah of the Day
+  - Hadith of the Day
+  - Renowned Ahadith list
+- In-app reminder settings per user
+
+## Local Run
 
 ```bash
 cd /Users/nisar/Ammara/Github/family-sadaqa-counter
@@ -12,18 +32,21 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
-## Deploy on Streamlit Cloud
+## Streamlit Cloud Deploy
 
-1. Push this repo to GitHub.
-2. Open https://share.streamlit.io and create a new app.
-3. Select repo `psxchatbot/Tasbeeh_Tracker`, branch `main`, file `app.py`.
-4. Add secrets:
+1. Push to GitHub repo.
+2. In Streamlit Cloud, choose:
+   - Repo: `psxchatbot/Tasbeeh_Tracker`
+   - Branch: `main`
+   - Main file: `app.py`
+3. Add Secrets:
 
 ```toml
 FAMILY_ACCESS_CODE = "your-private-code"
-FAMILY_MEMBERS = "Ammara,Ali,Sibling3,Sibling4"
 ```
 
-## Note
+## Notes
 
-SQLite file is stored in `data/tasbeeh_tracker.db`. On free hosting, data can reset after restarts; use Supabase for permanent cloud data.
+- SQLite DB path: `data/tasbeeh_tracker.db`
+- Free Streamlit restarts may reset local file storage.
+- For durable long-term data, migrate to Supabase/Postgres.
