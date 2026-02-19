@@ -220,6 +220,17 @@ def apply_styles() -> None:
           line-height: 1.95;
           color: #153d33;
         }
+        .hero-dua-arabic {
+          margin-top: .65rem;
+          padding-top: .55rem;
+          border-top: 1px dashed rgba(255,255,255,0.55);
+          direction: rtl;
+          text-align: right;
+          font-family: 'Noto Naskh Arabic', 'Amiri', serif;
+          font-size: 1.12rem;
+          line-height: 2.0;
+          color: #153d33;
+        }
         .cat-box {
           background: rgba(255,255,255,0.86);
           border: 1px solid rgba(27,54,40,0.14);
@@ -665,16 +676,26 @@ def top_section() -> None:
           </p>
           <div class="hero-dua">
             <strong>Dua:</strong><br/>
-            O Allah, forgive my father <strong>(Muhammad Ashraf)</strong> completely, elevate his rank among the righteous, expand and illuminate his grave,
-            replace his shortcomings with Your mercy, and grant him ease on the Day of Judgment.<br/>
-            O Allah, accept every tasbeeh, recitation, charity, and dua we do as sadaqah jariyah for him, and unite us with him
-            in Jannat al-Firdaws without reckoning. Ameen.
+            Allahummaghfir lahu <strong>(my father Muhammad Ashraf)</strong> warhamhu wa 'afihi wa'fu 'anhu, wa akrim nuzulahu,
+            wa wassi' mudkhalahu, waghsilhu bil-ma'i wath-thalji wal-barad, wa naqqihi minal-khataya kama naqqaytath-thawbal-abyada minad-danas,
+            wa abdilhu daran khayran min darihi, wa ahlan khayran min ahlihi, wa zawjan khayran min zawjihi,
+            wa adkhilhul-jannah, wa a'idhhu min 'adhabil-qabr wa 'adhabin-nar.
+            <div class="hero-dua-arabic">
+              <strong>العربية:</strong><br/>
+              اللَّهُمَّ اغْفِرْ لَهُ (أَبِي مُحَمَّد أَشْرَف) وَارْحَمْهُ، وَعَافِهِ وَاعْفُ عَنْهُ،
+              وَأَكْرِمْ نُزُلَهُ، وَوَسِّعْ مُدْخَلَهُ، وَاغْسِلْهُ بِالْمَاءِ وَالثَّلْجِ وَالْبَرَدِ،
+              وَنَقِّهِ مِنَ الْخَطَايَا كَمَا نَقَّيْتَ الثَّوْبَ الْأَبْيَضَ مِنَ الدَّنَسِ،
+              وَأَبْدِلْهُ دَارًا خَيْرًا مِنْ دَارِهِ، وَأَهْلًا خَيْرًا مِنْ أَهْلِهِ،
+              وَزَوْجًا خَيْرًا مِنْ زَوْجِهِ، وَأَدْخِلْهُ الْجَنَّةَ، وَأَعِذْهُ مِنْ عَذَابِ الْقَبْرِ وَعَذَابِ النَّارِ.
+            </div>
             <div class="hero-dua-urdu">
               <strong>اردو ترجمہ:</strong><br/>
-              اے اللہ! میرے والد <strong>(محمد اشرف)</strong> کی مکمل مغفرت فرما، نیک لوگوں میں ان کے درجات بلند فرما،
-              ان کی قبر کو کشادہ اور منور فرما، ان کی کوتاہیوں کو اپنی رحمت سے بدل دے، اور قیامت کے دن انہیں آسانی عطا فرما۔<br/>
-              اے اللہ! ہم جو تسبیح، تلاوت، صدقہ اور دعا کرتے ہیں اسے ان کے لیے صدقۂ جاریہ قبول فرما،
-              اور ہمیں ان کے ساتھ جنت الفردوس میں بغیر حساب جمع فرما۔ آمین۔
+              اے اللہ! ان کی مغفرت فرما <strong>(میرے والد محمد اشرف)</strong>، ان پر رحم فرما، انہیں عافیت دے،
+              ان سے درگزر فرما، ان کی مہمانی کو عزت دے، ان کی قبر کو کشادہ فرما،
+              انہیں پانی، برف اور اولوں سے دھو دے، اور ان کے گناہوں کو اس طرح پاک کر دے
+              جیسے سفید کپڑا میل سے پاک کیا جاتا ہے۔<br/>
+              اے اللہ! انہیں ان کے گھر سے بہتر گھر عطا فرما، ان کے اہل سے بہتر اہل عطا فرما،
+              اور جنت میں داخل فرما، اور انہیں عذابِ قبر اور عذابِ جہنم سے بچا۔ آمین۔
             </div>
           </div>
         </div>
