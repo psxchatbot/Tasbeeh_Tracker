@@ -4,6 +4,7 @@ import sqlite3
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
+import altair as alt
 import extra_streamlit_components as stx
 import pandas as pd
 import streamlit as st
@@ -339,26 +340,32 @@ def top_section() -> None:
 
 def deeds_tab(conn: sqlite3.Connection, user_name: str, df: pd.DataFrame) -> None:
     st.subheader("Collective Deeds")
-    st.caption("Single graph above, quick +1 buttons below each category.")
+    st.caption("Press +1 below each category. Chart updates instantly.")
 
     counts = category_count_map(df)
     deed_totals = [counts.get(cat, 0) for cat in DEED_CATEGORIES]
 
-    chart_rows = pd.DataFrame(
-        {"Category": DEED_CATEGORIES, "Total": deed_totals}
-    ).set_index("Category")
-    st.bar_chart(chart_rows, y="Total", use_container_width=True)
+    chart_rows = pd.DataFrame({"Category": DEED_CATEGORIES, "Total": deed_totals})
+    bar = alt.Chart(chart_rows).mark_bar(cornerRadiusTopLeft=6, cornerRadiusTopRight=6).encode(
+        x=alt.X("Category:N", sort=DEED_CATEGORIES, axis=alt.Axis(labelAngle=0, title=None)),
+        y=alt.Y("Total:Q", title=None),
+        color=alt.value("#2f7a57"),
+        tooltip=["Category", "Total"],
+    )
+    labels = alt.Chart(chart_rows).mark_text(
+        align="center", baseline="bottom", dy=-4, color="#1b3628", fontWeight="bold"
+    ).encode(
+        x=alt.X("Category:N", sort=DEED_CATEGORIES),
+        y=alt.Y("Total:Q"),
+        text=alt.Text("Total:Q"),
+    )
+    st.altair_chart((bar + labels).properties(height=320), use_container_width=True)
 
     cols = st.columns(len(DEED_CATEGORIES))
     for col, category in zip(cols, DEED_CATEGORIES):
         with col:
-            st.markdown(
-                "<div class='cat-box'>"
-                f"<p class='cat-title'>{category}</p>"
-                f"<p class='cat-total'>Counter: {counts.get(category, 0)}</p>"
-                "</div>",
-                unsafe_allow_html=True,
-            )
+            st.markdown(f"**{category}**")
+            st.caption(f"Total: {counts.get(category, 0)}")
             if st.button("+1", key=f"btn-{category}", use_container_width=True):
                 add_entry(conn, user_name, category, 1, 0, "")
                 st.rerun()
@@ -388,16 +395,6 @@ def sadaqah_tab(conn: sqlite3.Connection, user_name: str, df: pd.DataFrame) -> N
             add_entry(conn, user_name, SADAQAH_CATEGORY, 1, int(amount_pkr), note)
             st.success("Sadaqah added.")
             st.rerun()
-
-
-def activity_section(df: pd.DataFrame) -> None:
-    st.subheader("Recent Collective Activity")
-    if df.empty:
-        st.info("No entries yet.")
-        return
-    recent = df[["created_at", "category", "count", "amount_pkr", "note"]].copy()
-    recent["created_at"] = pd.to_datetime(recent["created_at"], utc=True).dt.strftime("%Y-%m-%d %H:%M UTC")
-    st.dataframe(recent.head(20), use_container_width=True, hide_index=True)
 
 
 def inspiration_section() -> None:
@@ -440,7 +437,6 @@ def main() -> None:
     tabs = st.tabs(["Deeds", "Sadaqah", "Daily Content", "Settings"])
     with tabs[0]:
         deeds_tab(conn, user_name, df)
-        activity_section(fetch_df(conn))
     with tabs[1]:
         sadaqah_tab(conn, user_name, fetch_df(conn))
     with tabs[2]:
