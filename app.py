@@ -588,14 +588,12 @@ def main() -> None:
     front_daily_cards()
     show_reminder(conn, user_name)
     df = fetch_df(conn)
-    tabs = st.tabs(["Deeds", "Sadaqah", "Daily Content", "Settings"])
+    tabs = st.tabs(["Deeds", "Sadaqah", "Settings"])
     with tabs[0]:
         deeds_tab(conn, user_name, df)
     with tabs[1]:
         sadaqah_tab(conn, user_name, fetch_df(conn))
     with tabs[2]:
-        inspiration_section()
-    with tabs[3]:
         settings_section(conn, user_name)
 
 
