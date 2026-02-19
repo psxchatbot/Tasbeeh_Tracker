@@ -1,26 +1,18 @@
 # Tasbeeh Tracker (Family)
 
-A private family Streamlit app for collective deeds in memory of **Muhammad Ashraf**.
+A shared Streamlit app for collective deeds in memory of **Muhammad Ashraf**.
 
 ## Features
 
 - Memorial opening message for your father
 - Mobile-friendly layout
-- One-time name save per device (cookie-based)
-- Shared family code protection (optional)
-- Collective counters only (no per-user public breakdown)
-- Category logging tabs:
-  - Tasbeeh
-  - Zikr
-  - Quran Recitation / Verses
-  - Ahadith
-  - Other Good Deeds
-  - Sadaqah (PKR amount)
-- Daily Islamic content:
-  - Ayah of the Day
-  - Hadith of the Day
-  - Renowned Ahadith list
-- In-app reminder settings per user
+- Glassmorphism UI (frosted cards, translucent layers)
+- Open access (no login required)
+- Collective counters only
+- Deeds chart with quick +1 / +3 / +5 actions
+- Separate Sadaqah tab with PKR tracking
+- Front-page Ayat of the Day + Hadees of the Day
+- Live API fetch with fallback content
 
 ## Local Run
 
@@ -42,7 +34,6 @@ streamlit run app.py
 3. Add Secrets:
 
 ```toml
-FAMILY_ACCESS_CODE = "your-private-code"
 HADITH_API_KEY = "your-hadithapi-key"
 # Optional override:
 # HADITH_API_BASE_URL = "https://hadithapi.com/api"

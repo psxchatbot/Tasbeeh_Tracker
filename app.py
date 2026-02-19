@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import sqlite3
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 import json
 from pathlib import Path
 from urllib.error import URLError
@@ -9,14 +9,11 @@ from urllib.parse import urlencode
 from urllib.request import urlopen
 
 import altair as alt
-import extra_streamlit_components as stx
 import pandas as pd
 import streamlit as st
 
 APP_TITLE = "Tasbeeh Tracker"
 DB_PATH = Path(__file__).parent / "data" / "tasbeeh_tracker.db"
-NAME_COOKIE = "tasbeeh_display_name"
-ACCESS_COOKIE = "tasbeeh_access_ok"
 
 DEED_CATEGORIES = [
     "Zikr",
@@ -45,14 +42,6 @@ HADITH_OPTIONS = [
     {"ref": "Riyad as-Salihin", "text": "Whoever guides to good will have a reward like the doer of it."},
     {"ref": "Sahih Muslim", "text": "Supplication for your brother in his absence is answered."},
 ]
-
-RENOWNED_HADITH = [
-    "Actions are judged by intentions.",
-    "Whoever believes in Allah and the Last Day should speak good or remain silent.",
-    "None of you truly believes until he loves for his brother what he loves for himself.",
-    "The strong person is the one who controls himself when angry.",
-]
-
 
 @st.cache_resource
 def get_conn() -> sqlite3.Connection:
@@ -273,53 +262,6 @@ def apply_styles() -> None:
         """,
         unsafe_allow_html=True,
     )
-
-
-def cookie_manager() -> stx.CookieManager:
-    return stx.CookieManager()
-
-
-def access_gate(cookies: stx.CookieManager) -> None:
-    required_code = str(st.secrets.get("FAMILY_ACCESS_CODE", "")).strip()
-    if not required_code:
-        return
-
-    if cookies.get(ACCESS_COOKIE) == "ok":
-        return
-
-    st.sidebar.subheader("Family Access")
-    code = st.sidebar.text_input("Enter family code", type="password")
-    if st.sidebar.button("Unlock", use_container_width=True):
-        if code == required_code:
-            cookies.set(ACCESS_COOKIE, "ok", expires_at=datetime.utcnow() + timedelta(days=30))
-            st.rerun()
-        st.sidebar.error("Incorrect access code")
-
-    st.warning("This app is private. Enter family code in the sidebar.")
-    st.stop()
-
-
-def get_display_name(cookies: stx.CookieManager) -> str:
-    saved_name = (cookies.get(NAME_COOKIE) or "").strip()
-    if "display_name" not in st.session_state:
-        st.session_state.display_name = saved_name
-
-    st.sidebar.subheader("Your Name")
-    typed_name = st.sidebar.text_input("Enter your name", value=st.session_state.display_name, max_chars=40)
-    if st.sidebar.button("Save Name", use_container_width=True):
-        clean = typed_name.strip()
-        if not clean:
-            st.sidebar.error("Name cannot be empty.")
-        else:
-            st.session_state.display_name = clean
-            cookies.set(NAME_COOKIE, clean, expires_at=datetime.utcnow() + timedelta(days=365))
-            st.sidebar.success("Name saved on this device.")
-
-    final_name = (typed_name or st.session_state.display_name).strip()
-    if not final_name:
-        st.info("Enter your name in sidebar once to start logging.")
-        st.stop()
-    return final_name
 
 
 def add_entry(conn: sqlite3.Connection, entered_by: str, category: str, count: int, amount_pkr: int, note: str) -> None:
@@ -669,16 +611,6 @@ def sadaqah_tab(conn: sqlite3.Connection, user_name: str, df: pd.DataFrame) -> N
             add_entry(conn, user_name, SADAQAH_CATEGORY, 1, int(amount_pkr), note)
             st.success("Sadaqah added.")
             st.rerun()
-
-
-def inspiration_section() -> None:
-    ayah, hadith = daily_content()
-    st.subheader("Daily Inspiration")
-    st.markdown(f"<div class='card'><strong>Ayah of the Day ({ayah['ref']})</strong><br/>{ayah['text']}</div>", unsafe_allow_html=True)
-    st.markdown(f"<div class='card'><strong>Hadith of the Day ({hadith['ref']})</strong><br/>{hadith['text']}</div>", unsafe_allow_html=True)
-    st.markdown("#### Renowned Ahadith")
-    for item in RENOWNED_HADITH:
-        st.markdown(f"- {item}")
 
 
 def settings_section(conn: sqlite3.Connection, user_name: str) -> None:
