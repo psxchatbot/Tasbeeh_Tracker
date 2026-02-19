@@ -165,7 +165,7 @@ def apply_styles() -> None:
     st.markdown(
         """
         <style>
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&family=Noto+Naskh+Arabic:wght@500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&family=Noto+Naskh+Arabic:wght@500;600;700&family=Noto+Nastaliq+Urdu:wght@400;500;600&display=swap');
         .stApp {
           background:
             radial-gradient(circle at 12% 12%, rgba(118, 197, 163, 0.30), rgba(255,255,255,0) 28%),
@@ -219,9 +219,9 @@ def apply_styles() -> None:
           border-top: 1px dashed rgba(255,255,255,0.55);
           direction: rtl;
           text-align: right;
-          font-family: 'Noto Naskh Arabic', 'Amiri', serif;
-          font-size: 1.07rem;
-          line-height: 2.0;
+          font-family: 'Noto Nastaliq Urdu', 'Noto Naskh Arabic', 'Amiri', serif;
+          font-size: 1.12rem;
+          line-height: 2.2;
           color: #153d33;
         }
         .hero-dua-arabic {
@@ -230,9 +230,9 @@ def apply_styles() -> None:
           border-top: 1px dashed rgba(255,255,255,0.55);
           direction: rtl;
           text-align: right;
-          font-family: 'Noto Naskh Arabic', 'Amiri', serif;
-          font-size: 1.22rem;
-          line-height: 2.1;
+          font-family: 'Noto Naskh Arabic', 'Scheherazade New', 'Amiri', serif;
+          font-size: 1.28rem;
+          line-height: 2.15;
           color: #153d33;
         }
         .cat-box {
@@ -282,14 +282,26 @@ def apply_styles() -> None:
           margin: 0;
         }
         .daily-arabic {
-          font-size: 1.28rem;
-          line-height: 2.05;
+          font-size: 1.32rem;
+          line-height: 2.12;
           color: #123b31;
           direction: rtl;
           text-align: right;
-          font-family: 'Noto Naskh Arabic', 'Amiri', serif;
+          font-family: 'Noto Naskh Arabic', 'Scheherazade New', 'Amiri', serif;
           margin: .3rem 0 .6rem 0;
           background: rgba(255,255,255,0.28);
+          border: 1px solid rgba(255,255,255,0.4);
+          border-radius: 10px;
+          padding: .55rem .65rem;
+        }
+        .urdu-block {
+          direction: rtl;
+          text-align: right;
+          font-family: 'Noto Nastaliq Urdu', 'Noto Naskh Arabic', 'Amiri', serif;
+          font-size: 1.06rem;
+          line-height: 2.15;
+          color: #153d33;
+          background: rgba(255,255,255,0.25);
           border: 1px solid rgba(255,255,255,0.4);
           border-radius: 10px;
           padding: .55rem .65rem;
@@ -652,12 +664,11 @@ def fetch_hadith_of_day() -> dict[str, str]:
                     "hadithUrdu",
                     "hadith_urdu",
                     "text_ur",
-                    "urduNarrator",
                 ],
             )
             source = hadith_source_label(chosen)
 
-            if english and arabic:
+            if english and arabic and urdu:
                 return {
                     "ref": source,
                     "arabic": arabic,
@@ -679,9 +690,7 @@ def top_section() -> None:
             May Allah have mercy on him, forgive him, and grant him the highest place in Jannah. Ameen.
           </p>
           <div class="hero-dua">
-            <strong>Dua:</strong><br/>
             <div class="hero-dua-arabic">
-              <strong>العربية:</strong><br/>
               اللَّهُمَّ اغْفِرْ لَهُ (أَبِي مُحَمَّد أَشْرَف) وَارْحَمْهُ، وَعَافِهِ وَاعْفُ عَنْهُ،
               وَأَكْرِمْ نُزُلَهُ، وَوَسِّعْ مُدْخَلَهُ، وَاغْسِلْهُ بِالْمَاءِ وَالثَّلْجِ وَالْبَرَدِ،
               وَنَقِّهِ مِنَ الْخَطَايَا كَمَا نَقَّيْتَ الثَّوْبَ الْأَبْيَضَ مِنَ الدَّنَسِ،
@@ -719,15 +728,16 @@ def front_daily_cards() -> None:
                 "<p class='daily-title'>Ayat of the Day</p>"
                 f"<div class='daily-ref'>{escape(ayah.get('ref', 'Quran'))}</div>"
                 f"<p class='daily-arabic'>{escape(ayah.get('arabic', ''))}</p>"
+                f"<div class='daily-source'>Source: {escape(ayah.get('source', 'Curated Backup'))}</div>"
                 "<div class='daily-english-label'>English Translation</div>"
                 f"<p class='daily-text'>{escape(ayah.get('english', ''))}</p>"
-                f"<div class='daily-source'>Source: {escape(ayah.get('source', 'Curated Backup'))}</div>"
                 "</div>"
             ),
             unsafe_allow_html=True,
         )
         with st.expander("اردو ترجمہ ▾", expanded=False):
-            st.markdown(ayah.get("urdu", "") or "اردو ترجمہ دستیاب نہیں۔")
+            ur = ayah.get("urdu", "") or "اردو ترجمہ دستیاب نہیں۔"
+            st.markdown(f"<div class='urdu-block'>{escape(ur).replace(chr(10), '<br/>')}</div>", unsafe_allow_html=True)
     with c2:
         st.markdown(
             (
@@ -735,15 +745,16 @@ def front_daily_cards() -> None:
                 "<p class='daily-title'>Hadees of the Day</p>"
                 f"<div class='daily-ref'>{escape(hadith.get('ref', 'Hadith'))}</div>"
                 f"<p class='daily-arabic'>{escape(hadith.get('arabic', ''))}</p>"
+                f"<div class='daily-source'>Source: {escape(hadith.get('source', 'Curated Backup'))}</div>"
                 "<div class='daily-english-label'>English Translation</div>"
                 f"<p class='daily-text'>{escape(hadith.get('english', ''))}</p>"
-                f"<div class='daily-source'>Source: {escape(hadith.get('source', 'Curated Backup'))}</div>"
                 "</div>"
             ),
             unsafe_allow_html=True,
         )
         with st.expander("اردو ترجمہ ▾", expanded=False):
-            st.markdown(hadith.get("urdu", "") or "اردو ترجمہ دستیاب نہیں۔")
+            ur = hadith.get("urdu", "") or "اردو ترجمہ دستیاب نہیں۔"
+            st.markdown(f"<div class='urdu-block'>{escape(ur).replace(chr(10), '<br/>')}</div>", unsafe_allow_html=True)
 
 
 def deeds_tab(conn: sqlite3.Connection, user_name: str, df: pd.DataFrame) -> None:
