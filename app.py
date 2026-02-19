@@ -22,20 +22,20 @@ DEED_CATEGORIES = [
     "Zikr",
     "Quran Recitation / Verses",
     "Ahadith",
-    "Other Good Deeds",
+    "Darud",
 ]
 SADAQAH_CATEGORY = "Sadaqah"
 CATEGORY_LABELS = {
     "Zikr": "Zikr",
     "Quran Recitation / Verses": "Quran",
     "Ahadith": "Ahadith",
-    "Other Good Deeds": "Good Deeds",
+    "Darud": "Darud",
 }
 CATEGORY_META = {
     "Zikr": {"icon": "🕊️", "color": "#1F7A5C"},
     "Quran Recitation / Verses": {"icon": "📖", "color": "#2F8E6C"},
     "Ahadith": {"icon": "🌙", "color": "#37A77E"},
-    "Other Good Deeds": {"icon": "🤲", "color": "#57B993"},
+    "Darud": {"icon": "🤲", "color": "#57B993"},
 }
 
 AYAT_OPTIONS = [
