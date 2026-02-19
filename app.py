@@ -117,15 +117,24 @@ def apply_styles() -> None:
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap');
         .stApp {
-          background: radial-gradient(circle at 0% 0%, #fff4e6 0%, #f6f7ef 45%, #edf4fb 100%);
+          background:
+            radial-gradient(circle at 0% 0%, rgba(255, 225, 188, 0.56) 0%, rgba(255,255,255,0) 38%),
+            radial-gradient(circle at 100% 0%, rgba(165, 222, 204, 0.45) 0%, rgba(255,255,255,0) 32%),
+            linear-gradient(160deg, #f9f3eb 0%, #f4f8f2 50%, #ecf5fb 100%);
           font-family: 'Inter', sans-serif;
         }
+        .block-container {
+          max-width: 1080px;
+          padding-top: 1rem;
+          padding-bottom: 2.5rem;
+        }
         .hero {
-          background: rgba(255,255,255,0.80);
+          background: linear-gradient(135deg, rgba(255,255,255,0.90), rgba(255,251,243,0.92));
           border: 1px solid rgba(28,36,30,0.15);
-          border-radius: 16px;
-          padding: 1rem;
-          margin-bottom: .9rem;
+          border-radius: 20px;
+          padding: 1.1rem;
+          margin-bottom: 1rem;
+          box-shadow: 0 18px 36px rgba(22, 41, 32, 0.08);
         }
         .hero-title {
           color: #1b3628;
@@ -136,10 +145,10 @@ def apply_styles() -> None:
         .hero-text { color: #3d4a43; margin: .4rem 0 0; line-height: 1.45; }
         .hero-dua {
           margin-top: .8rem;
-          padding: .75rem .9rem;
+          padding: .85rem 1rem;
           border-radius: 10px;
-          background: #fff8ee;
-          border: 1px solid #ecdcc8;
+          background: linear-gradient(135deg, #fff9f0, #fffdfa);
+          border: 1px solid #ecd8be;
           color: #3e342a;
           line-height: 1.55;
         }
@@ -166,17 +175,26 @@ def apply_styles() -> None:
           padding: 8px;
         }
         .stButton > button {
-          border-radius: 10px !important;
-          border: 1px solid rgba(35,67,50,0.16) !important;
+          border-radius: 12px !important;
+          border: 1px solid rgba(35,67,50,0.12) !important;
           font-weight: 600 !important;
+          background: linear-gradient(135deg, #2f7a57, #3f9169) !important;
+          color: #fff !important;
+          box-shadow: 0 10px 18px rgba(33, 93, 67, 0.28) !important;
+          transition: transform .15s ease, box-shadow .15s ease !important;
+        }
+        .stButton > button:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 12px 22px rgba(33, 93, 67, 0.34) !important;
         }
         .deed-chip {
-          border: 1px solid rgba(35,67,50,0.14);
-          border-radius: 10px;
-          background: rgba(255,255,255,0.78);
-          padding: .55rem .7rem;
+          border: 1px solid rgba(35,67,50,0.12);
+          border-radius: 14px;
+          background: linear-gradient(145deg, rgba(255,255,255,0.91), rgba(253,255,251,0.74));
+          padding: .6rem .72rem;
           margin-bottom: .4rem;
           min-height: 78px;
+          box-shadow: 0 10px 20px rgba(23, 45, 35, 0.06);
         }
         .deed-chip-title {
           font-size: .95rem;
@@ -188,6 +206,19 @@ def apply_styles() -> None:
           color: #5b6963;
           margin: .2rem 0 0;
           font-size: .88rem;
+        }
+        [data-baseweb="tab-list"] {
+          gap: 0.35rem;
+          background: rgba(255,255,255,0.75);
+          border: 1px solid rgba(38,66,50,0.12);
+          border-radius: 14px;
+          padding: .36rem;
+          width: fit-content;
+          box-shadow: 0 8px 16px rgba(22, 42, 33, 0.08);
+        }
+        [data-baseweb="tab"] {
+          border-radius: 10px !important;
+          padding: .4rem .8rem !important;
         }
         @media (max-width: 768px) {
           .hero-title { font-size: 1.35rem; }
@@ -400,7 +431,7 @@ def deeds_tab(conn: sqlite3.Connection, user_name: str, df: pd.DataFrame) -> Non
     hover = alt.selection_point(on="mouseover", fields=["Category"], empty=True)
     bar = alt.Chart(chart_rows).mark_bar(cornerRadiusTopLeft=6, cornerRadiusTopRight=6).encode(
         x=alt.X("Category:N", sort=DEED_CATEGORIES, axis=alt.Axis(labelAngle=0, title=None)),
-        y=alt.Y("Total:Q", title=None),
+        y=alt.Y("Total:Q", title=None, axis=alt.Axis(grid=True)),
         color=alt.Color("Color:N", scale=None, legend=None),
         opacity=alt.condition(hover, alt.value(1.0), alt.value(0.85)),
         tooltip=["Category", "Total"],
@@ -412,7 +443,10 @@ def deeds_tab(conn: sqlite3.Connection, user_name: str, df: pd.DataFrame) -> Non
         y=alt.Y("Total:Q"),
         text=alt.Text("Total:Q"),
     )
-    st.altair_chart((bar + labels).properties(height=320), use_container_width=True)
+    st.altair_chart(
+        (bar + labels).properties(height=330).configure_axis(gridColor="#d9e8de"),
+        use_container_width=True,
+    )
 
     cols = st.columns(len(DEED_CATEGORIES))
     for col, category in zip(cols, DEED_CATEGORIES):
@@ -440,8 +474,17 @@ def sadaqah_tab(conn: sqlite3.Connection, user_name: str, df: pd.DataFrame) -> N
 
     graph_df = pd.DataFrame(
         {"Metric": ["Sadaqah Entries", "Sadaqah PKR"], "Value": [sadaqah_count, total_pkr]}
-    ).set_index("Metric")
-    st.bar_chart(graph_df, y="Value", use_container_width=True)
+    )
+    s_bar = alt.Chart(graph_df).mark_bar(cornerRadiusTopLeft=6, cornerRadiusTopRight=6).encode(
+        x=alt.X("Metric:N", axis=alt.Axis(labelAngle=0, title=None)),
+        y=alt.Y("Value:Q", axis=alt.Axis(grid=True), title=None),
+        color=alt.value("#3f9169"),
+        tooltip=["Metric", "Value"],
+    )
+    s_lbl = alt.Chart(graph_df).mark_text(
+        align="center", baseline="bottom", dy=-4, color="#1b3628", fontWeight="bold"
+    ).encode(x="Metric:N", y="Value:Q", text="Value:Q")
+    st.altair_chart((s_bar + s_lbl).properties(height=260), use_container_width=True)
 
     m1, m2 = st.columns(2)
     m1.metric("Sadaqah Entries", f"{sadaqah_count}")
