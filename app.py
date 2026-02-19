@@ -85,6 +85,7 @@ def get_conn() -> sqlite3.Connection:
         )
         """
     )
+    ensure_schema(conn)
     conn.execute(
         """
         CREATE TABLE IF NOT EXISTS user_prefs (
@@ -98,12 +99,62 @@ def get_conn() -> sqlite3.Connection:
     return conn
 
 
+def ensure_schema(conn: sqlite3.Connection) -> None:
+    cols = {
+        row[1] for row in conn.execute("PRAGMA table_info(contributions)").fetchall()
+    }
+    if not cols:
+        return
+
+    if "entered_by" not in cols:
+        # Old schema used `member`; map it into the new `entered_by`.
+        conn.execute("ALTER TABLE contributions ADD COLUMN entered_by TEXT")
+        if "member" in cols:
+            conn.execute(
+                "UPDATE contributions SET entered_by = COALESCE(entered_by, member, 'Family')"
+            )
+        else:
+            conn.execute(
+                "UPDATE contributions SET entered_by = COALESCE(entered_by, 'Family')"
+            )
+
+    if "category" not in cols:
+        # Old schema used `type`; map it into the new `category`.
+        conn.execute("ALTER TABLE contributions ADD COLUMN category TEXT")
+        if "type" in cols:
+            conn.execute(
+                "UPDATE contributions SET category = COALESCE(category, type, 'Other Good Deeds')"
+            )
+        else:
+            conn.execute(
+                "UPDATE contributions SET category = COALESCE(category, 'Other Good Deeds')"
+            )
+
+    if "amount_pkr" not in cols:
+        conn.execute(
+            "ALTER TABLE contributions ADD COLUMN amount_pkr INTEGER NOT NULL DEFAULT 0"
+        )
+
+    if "count" not in cols:
+        conn.execute("ALTER TABLE contributions ADD COLUMN count INTEGER NOT NULL DEFAULT 1")
+
+    conn.execute(
+        "UPDATE contributions SET entered_by = COALESCE(NULLIF(TRIM(entered_by), ''), 'Family')"
+    )
+    conn.execute(
+        "UPDATE contributions SET category = COALESCE(NULLIF(TRIM(category), ''), 'Other Good Deeds')"
+    )
+    conn.commit()
+
+
 def apply_styles() -> None:
     st.markdown(
         """
         <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap');
         .stApp {
           background: radial-gradient(circle at 0% 0%, #fff4e6 0%, #f6f7ef 45%, #edf4fb 100%);
+          font-family: 'Inter', sans-serif;
         }
         .hero {
           background: rgba(255,255,255,0.78);
@@ -112,8 +163,22 @@ def apply_styles() -> None:
           padding: 1rem 1rem;
           margin-bottom: .8rem;
         }
-        .hero-title { color: #1b3628; font-size: 1.7rem; margin: 0; }
+        .hero-title {
+          color: #1b3628;
+          font-size: 1.8rem;
+          margin: 0;
+          font-family: 'Playfair Display', serif;
+        }
         .hero-text { color: #3d4a43; margin: .4rem 0 0; line-height: 1.45; }
+        .hero-dua {
+          margin-top: .8rem;
+          padding: .75rem .9rem;
+          border-radius: 10px;
+          background: #fff8ee;
+          border: 1px solid #ecdcc8;
+          color: #3e342a;
+          line-height: 1.55;
+        }
         .card {
           background: rgba(255,255,255,0.80);
           border: 1px solid rgba(28,36,30,0.12);
@@ -279,6 +344,13 @@ def top_section() -> None:
             For our beloved father <strong>Muhammad Ashraf</strong>.<br/>
             May Allah have mercy on him, forgive him, and grant him the highest place in Jannah. Ameen.
           </p>
+          <div class="hero-dua">
+            <strong>Dua:</strong><br/>
+            O Allah, forgive Muhammad Ashraf completely, elevate his rank among the righteous, expand and illuminate his grave,
+            replace his shortcomings with Your mercy, and grant him ease on the Day of Judgment.<br/>
+            O Allah, accept every tasbeeh, recitation, charity, and dua we do as sadaqah jariyah for him, and unite us with him
+            in Jannat al-Firdaws without reckoning. Ameen.
+          </div>
         </div>
         """,
         unsafe_allow_html=True,
