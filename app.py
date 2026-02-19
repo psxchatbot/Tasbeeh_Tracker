@@ -26,10 +26,10 @@ DEED_CATEGORIES = [
 ]
 SADAQAH_CATEGORY = "Sadaqah"
 CATEGORY_META = {
-    "Zikr": {"icon": "🕊️", "color": "#2f7a57"},
-    "Quran Recitation / Verses": {"icon": "📖", "color": "#3f8f74"},
-    "Ahadith": {"icon": "🌙", "color": "#4d9687"},
-    "Other Good Deeds": {"icon": "🤲", "color": "#5da18f"},
+    "Zikr": {"icon": "🕊️", "color": "#1F7A5C"},
+    "Quran Recitation / Verses": {"icon": "📖", "color": "#2F8E6C"},
+    "Ahadith": {"icon": "🌙", "color": "#37A77E"},
+    "Other Good Deeds": {"icon": "🤲", "color": "#57B993"},
 }
 
 AYAT_OPTIONS = [
@@ -157,10 +157,10 @@ def apply_styles() -> None:
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&family=Noto+Naskh+Arabic:wght@500;600&display=swap');
         .stApp {
           background:
-            radial-gradient(circle at 12% 12%, rgba(181, 235, 255, 0.35), rgba(255,255,255,0) 28%),
-            radial-gradient(circle at 88% 8%, rgba(208, 195, 255, 0.25), rgba(255,255,255,0) 30%),
-            radial-gradient(circle at 80% 82%, rgba(165, 246, 220, 0.22), rgba(255,255,255,0) 34%),
-            linear-gradient(150deg, #dfeaf6 0%, #edf4fb 46%, #e7eef9 100%);
+            radial-gradient(circle at 12% 12%, rgba(118, 197, 163, 0.30), rgba(255,255,255,0) 28%),
+            radial-gradient(circle at 88% 8%, rgba(189, 226, 210, 0.28), rgba(255,255,255,0) 30%),
+            radial-gradient(circle at 80% 82%, rgba(141, 209, 178, 0.22), rgba(255,255,255,0) 34%),
+            linear-gradient(150deg, #eaf6f0 0%, #e5f3ec 46%, #ddf2ea 100%);
           font-family: 'Inter', sans-serif;
         }
         .block-container {
@@ -179,13 +179,13 @@ def apply_styles() -> None:
           box-shadow: 0 18px 42px rgba(39, 78, 117, 0.2), inset 0 1px 0 rgba(255,255,255,0.6);
         }
         .hero-title {
-          color: #163248;
+          color: #173f35;
           font-size: 1.8rem;
           margin: 0;
           font-family: 'Playfair Display', serif;
           text-shadow: 0 2px 14px rgba(255,255,255,0.5);
         }
-        .hero-text { color: #1f3d52; margin: .4rem 0 0; line-height: 1.45; }
+        .hero-text { color: #245245; margin: .4rem 0 0; line-height: 1.45; }
         .hero-dua {
           margin-top: .8rem;
           padding: .85rem 1rem;
@@ -194,7 +194,7 @@ def apply_styles() -> None:
           border: 1px solid rgba(255,255,255,0.54);
           backdrop-filter: blur(14px);
           -webkit-backdrop-filter: blur(14px);
-          color: #17354a;
+          color: #20473d;
           line-height: 1.55;
         }
         .cat-box {
@@ -214,7 +214,7 @@ def apply_styles() -> None:
           padding: .8rem;
           backdrop-filter: blur(14px);
           -webkit-backdrop-filter: blur(14px);
-          box-shadow: 0 10px 28px rgba(45, 84, 120, 0.16);
+          box-shadow: 0 10px 28px rgba(23, 63, 53, 0.13);
         }
         .daily-card {
           background: linear-gradient(135deg, rgba(255,255,255,0.38), rgba(255,255,255,0.18));
@@ -224,21 +224,21 @@ def apply_styles() -> None:
           min-height: 170px;
           backdrop-filter: blur(16px);
           -webkit-backdrop-filter: blur(16px);
-          box-shadow: 0 12px 30px rgba(44, 82, 119, 0.19), inset 0 1px 0 rgba(255,255,255,0.6);
+          box-shadow: 0 12px 30px rgba(25, 78, 63, 0.16), inset 0 1px 0 rgba(255,255,255,0.6);
         }
         .daily-title {
           margin: 0 0 .4rem 0;
-          color: #17354a;
+          color: #173f35;
           font-size: 1rem;
           font-weight: 700;
         }
         .daily-ref {
-          color: #32536a;
+          color: #2b6153;
           font-size: .88rem;
           margin-bottom: .4rem;
         }
         .daily-text {
-          color: #224359;
+          color: #234b40;
           line-height: 1.65;
           font-size: 1rem;
           margin: 0;
@@ -246,7 +246,7 @@ def apply_styles() -> None:
         .daily-arabic {
           font-size: 1.28rem;
           line-height: 2.05;
-          color: #102f45;
+          color: #123b31;
           direction: rtl;
           text-align: right;
           font-family: 'Noto Naskh Arabic', 'Amiri', serif;
@@ -259,12 +259,12 @@ def apply_styles() -> None:
         .daily-source {
           margin-top: .45rem;
           font-size: .8rem;
-          color: #406177;
+          color: #2c6354;
         }
         .daily-english-label {
           margin: .45rem 0 .2rem;
           font-size: .82rem;
-          color: #446279;
+          color: #2f5d50;
           letter-spacing: .02em;
           text-transform: uppercase;
           font-weight: 600;
@@ -281,14 +281,14 @@ def apply_styles() -> None:
           border-radius: 12px !important;
           border: 1px solid rgba(255,255,255,0.45) !important;
           font-weight: 600 !important;
-          background: linear-gradient(135deg, rgba(42, 121, 166, 0.76), rgba(73, 112, 199, 0.72)) !important;
           color: #fff !important;
-          box-shadow: 0 10px 24px rgba(57, 94, 164, 0.33) !important;
+          background: linear-gradient(135deg, rgba(31, 122, 92, 0.88), rgba(55, 167, 126, 0.86)) !important;
+          box-shadow: 0 10px 24px rgba(31, 122, 92, 0.32) !important;
           transition: transform .15s ease, box-shadow .15s ease !important;
         }
         .stButton > button:hover {
           transform: translateY(-1px);
-          box-shadow: 0 14px 26px rgba(57, 94, 164, 0.42) !important;
+          box-shadow: 0 14px 26px rgba(31, 122, 92, 0.40) !important;
         }
         .deed-chip {
           border: 1px solid rgba(255,255,255,0.45);
@@ -299,16 +299,16 @@ def apply_styles() -> None:
           padding: .6rem .72rem;
           margin-bottom: .4rem;
           min-height: 78px;
-          box-shadow: 0 10px 24px rgba(45, 84, 120, 0.18);
+          box-shadow: 0 10px 24px rgba(24, 74, 60, 0.16);
         }
         .deed-chip-title {
           font-size: .95rem;
-          color: #173950;
+          color: #173f35;
           margin: 0;
           font-weight: 700;
         }
         .deed-chip-total {
-          color: #35526a;
+          color: #285a4d;
           margin: .2rem 0 0;
           font-size: .88rem;
         }
@@ -321,7 +321,7 @@ def apply_styles() -> None:
           border-radius: 14px;
           padding: .36rem;
           width: fit-content;
-          box-shadow: 0 12px 24px rgba(45, 84, 120, 0.2);
+          box-shadow: 0 12px 24px rgba(24, 74, 60, 0.16);
         }
         [data-baseweb="tab"] {
           border-radius: 10px !important;
