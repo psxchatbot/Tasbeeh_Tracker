@@ -261,19 +261,43 @@ def add_entry(
     amount_pkr: int,
     note: str,
 ) -> None:
+    table_cols = {
+        row[1] for row in conn.execute("PRAGMA table_info(contributions)").fetchall()
+    }
+
+    insert_cols: list[str] = ["created_at"]
+    insert_vals: list[object] = [datetime.utcnow().isoformat()]
+
+    # New schema columns
+    if "entered_by" in table_cols:
+        insert_cols.append("entered_by")
+        insert_vals.append(entered_by)
+    if "category" in table_cols:
+        insert_cols.append("category")
+        insert_vals.append(category)
+    if "count" in table_cols:
+        insert_cols.append("count")
+        insert_vals.append(count)
+    if "amount_pkr" in table_cols:
+        insert_cols.append("amount_pkr")
+        insert_vals.append(amount_pkr)
+    if "note" in table_cols:
+        insert_cols.append("note")
+        insert_vals.append(note.strip() or None)
+
+    # Legacy schema compatibility
+    if "member" in table_cols:
+        insert_cols.append("member")
+        insert_vals.append(entered_by)
+    if "type" in table_cols:
+        insert_cols.append("type")
+        insert_vals.append(category)
+
+    placeholders = ", ".join(["?"] * len(insert_cols))
+    cols_sql = ", ".join(insert_cols)
     conn.execute(
-        """
-        INSERT INTO contributions (created_at, entered_by, category, count, amount_pkr, note)
-        VALUES (?, ?, ?, ?, ?, ?)
-        """,
-        (
-            datetime.utcnow().isoformat(),
-            entered_by,
-            category,
-            count,
-            amount_pkr,
-            note.strip() or None,
-        ),
+        f"INSERT INTO contributions ({cols_sql}) VALUES ({placeholders})",
+        tuple(insert_vals),
     )
     conn.commit()
 
