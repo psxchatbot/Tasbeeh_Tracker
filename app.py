@@ -3,6 +3,7 @@ from __future__ import annotations
 import sqlite3
 from datetime import date, datetime
 import json
+from html import escape
 from pathlib import Path
 from urllib.error import URLError
 from urllib.parse import urlencode
@@ -30,17 +31,57 @@ CATEGORY_META = {
 }
 
 AYAT_OPTIONS = [
-    {"ref": "Qur'an 2:286", "text": "Allah does not burden a soul beyond that it can bear."},
-    {"ref": "Qur'an 13:28", "text": "Verily, in the remembrance of Allah do hearts find rest."},
-    {"ref": "Qur'an 94:5-6", "text": "Indeed, with hardship comes ease. Indeed, with hardship comes ease."},
-    {"ref": "Qur'an 14:7", "text": "If you are grateful, I will surely increase you."},
+    {
+        "ref": "Qur'an 2:286",
+        "arabic": "لَا يُكَلِّفُ اللَّهُ نَفْسًا إِلَّا وُسْعَهَا",
+        "english": "Allah does not burden a soul beyond that it can bear.",
+        "source": "Fallback",
+    },
+    {
+        "ref": "Qur'an 13:28",
+        "arabic": "أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ",
+        "english": "Verily, in the remembrance of Allah do hearts find rest.",
+        "source": "Fallback",
+    },
+    {
+        "ref": "Qur'an 94:5-6",
+        "arabic": "فَإِنَّ مَعَ الْعُسْرِ يُسْرًا ۝ إِنَّ مَعَ الْعُسْرِ يُسْرًا",
+        "english": "Indeed, with hardship comes ease. Indeed, with hardship comes ease.",
+        "source": "Fallback",
+    },
+    {
+        "ref": "Qur'an 14:7",
+        "arabic": "لَئِن شَكَرْتُمْ لَأَزِيدَنَّكُمْ",
+        "english": "If you are grateful, I will surely increase you.",
+        "source": "Fallback",
+    },
 ]
 
 HADITH_OPTIONS = [
-    {"ref": "Sahih Muslim", "text": "The most beloved deeds to Allah are those done regularly, even if small."},
-    {"ref": "Sahih Bukhari", "text": "The believer's shade on the Day of Resurrection will be his charity."},
-    {"ref": "Riyad as-Salihin", "text": "Whoever guides to good will have a reward like the doer of it."},
-    {"ref": "Sahih Muslim", "text": "Supplication for your brother in his absence is answered."},
+    {
+        "ref": "Sahih Bukhari & Sahih Muslim",
+        "arabic": "إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ",
+        "english": "Actions are judged by intentions.",
+        "source": "Fallback",
+    },
+    {
+        "ref": "Sahih Bukhari & Sahih Muslim",
+        "arabic": "مَنْ كَانَ يُؤْمِنُ بِاللَّهِ وَالْيَوْمِ الآخِرِ فَلْيَقُلْ خَيْرًا أَوْ لِيَصْمُتْ",
+        "english": "Whoever believes in Allah and the Last Day should speak good or remain silent.",
+        "source": "Fallback",
+    },
+    {
+        "ref": "Sahih Muslim",
+        "arabic": "لَا يُؤْمِنُ أَحَدُكُمْ حَتَّى يُحِبَّ لِأَخِيهِ مَا يُحِبُّ لِنَفْسِهِ",
+        "english": "None of you truly believes until he loves for his brother what he loves for himself.",
+        "source": "Fallback",
+    },
+    {
+        "ref": "Sahih Bukhari & Sahih Muslim",
+        "arabic": "لَيْسَ الشَّدِيدُ بِالصُّرَعَةِ، إِنَّمَا الشَّدِيدُ الَّذِي يَمْلِكُ نَفْسَهُ عِنْدَ الغَضَبِ",
+        "english": "The strong person is the one who controls himself when angry.",
+        "source": "Fallback",
+    },
 ]
 
 @st.cache_resource
@@ -196,6 +237,20 @@ def apply_styles() -> None:
           line-height: 1.5;
           font-size: .95rem;
           margin: 0;
+        }
+        .daily-arabic {
+          font-size: 1.1rem;
+          line-height: 1.9;
+          color: #102f45;
+          direction: rtl;
+          text-align: right;
+          font-family: 'Noto Naskh Arabic', 'Amiri', serif;
+          margin: .2rem 0 .55rem 0;
+        }
+        .daily-source {
+          margin-top: .45rem;
+          font-size: .8rem;
+          color: #406177;
         }
         .stMetric {
           background: linear-gradient(135deg, rgba(255,255,255,0.34), rgba(255,255,255,0.17));
@@ -376,17 +431,43 @@ def fetch_json(url: str) -> dict:
 def fetch_ayah_of_day() -> dict[str, str]:
     # 1..6236 keeps daily selection deterministic.
     ayah_number = (date.today().toordinal() % 6236) + 1
-    url = f"https://api.alquran.cloud/v1/ayah/{ayah_number}/en.asad"
+    url = f"https://api.alquran.cloud/v1/ayah/{ayah_number}/editions/quran-uthmani,en.asad"
     payload = fetch_json(url)
-    data = payload.get("data", {}) if isinstance(payload, dict) else {}
-    text = str(data.get("text", "")).strip()
-    surah = data.get("surah", {}) if isinstance(data.get("surah", {}), dict) else {}
+    data = payload.get("data", []) if isinstance(payload, dict) else []
+    if isinstance(data, list) and len(data) >= 2:
+        ar_data = data[0] if isinstance(data[0], dict) else {}
+        en_data = data[1] if isinstance(data[1], dict) else {}
+        arabic = str(ar_data.get("text", "")).strip()
+        english = str(en_data.get("text", "")).strip()
+        surah = ar_data.get("surah", {}) if isinstance(ar_data.get("surah", {}), dict) else {}
+        surah_no = surah.get("number")
+        ayah_in_surah = ar_data.get("numberInSurah")
+        if arabic and english and surah_no and ayah_in_surah:
+            return {
+                "ref": f"Qur'an {surah_no}:{ayah_in_surah}",
+                "arabic": arabic,
+                "english": english,
+                "source": "AlQuran.cloud",
+            }
+
+    # Fallback path for single-edition responses
+    single_url_ar = f"https://api.alquran.cloud/v1/ayah/{ayah_number}/quran-uthmani"
+    single_url_en = f"https://api.alquran.cloud/v1/ayah/{ayah_number}/en.asad"
+    ar_payload = fetch_json(single_url_ar)
+    en_payload = fetch_json(single_url_en)
+    ar_data = ar_payload.get("data", {}) if isinstance(ar_payload, dict) else {}
+    en_data = en_payload.get("data", {}) if isinstance(en_payload, dict) else {}
+    arabic = str(ar_data.get("text", "")).strip()
+    english = str(en_data.get("text", "")).strip()
+    surah = ar_data.get("surah", {}) if isinstance(ar_data.get("surah", {}), dict) else {}
     surah_no = surah.get("number")
-    ayah_in_surah = data.get("numberInSurah")
-    if text and surah_no and ayah_in_surah:
+    ayah_in_surah = ar_data.get("numberInSurah")
+    if arabic and english and surah_no and ayah_in_surah:
         return {
             "ref": f"Qur'an {surah_no}:{ayah_in_surah}",
-            "text": text,
+            "arabic": arabic,
+            "english": english,
+            "source": "AlQuran.cloud",
         }
 
     idx_ayah = date.today().toordinal() % len(AYAT_OPTIONS)
@@ -440,24 +521,39 @@ def fetch_hadith_of_day() -> dict[str, str]:
 
             idx = date.today().toordinal() % len(entries)
             chosen = entries[idx]
-            text = first_non_empty(
+            english = first_non_empty(
                 chosen,
                 [
                     "hadithEnglish",
                     "hadith_english",
                     "englishNarrator",
                     "text",
-                    "hadithUrdu",
+                    "text_en",
+                ],
+            )
+            arabic = first_non_empty(
+                chosen,
+                [
+                    "hadithArabic",
                     "hadith_ar",
+                    "arabic",
+                    "text_ar",
+                    "hadithArabicText",
                 ],
             )
             source = first_non_empty(
                 chosen,
                 ["book", "bookName", "collection", "source", "chapterEnglish"],
             ) or "Hadith API"
+            hadith_no = first_non_empty(
+                chosen,
+                ["hadithNumber", "hadith_number", "number", "hadithNo"],
+            )
+            if hadith_no:
+                source = f"{source} #{hadith_no}"
 
-            if text:
-                return {"ref": source, "text": text}
+            if english and arabic:
+                return {"ref": source, "arabic": arabic, "english": english, "source": "HadithAPI"}
 
     idx_hadith = (date.today().toordinal() * 3) % len(HADITH_OPTIONS)
     return HADITH_OPTIONS[idx_hadith]
@@ -493,8 +589,10 @@ def front_daily_cards() -> None:
             (
                 "<div class='daily-card'>"
                 "<p class='daily-title'>Ayat of the Day</p>"
-                f"<div class='daily-ref'>{ayah['ref']}</div>"
-                f"<p class='daily-text'>{ayah['text']}</p>"
+                f"<div class='daily-ref'>{escape(ayah.get('ref', 'Quran'))}</div>"
+                f"<p class='daily-arabic'>{escape(ayah.get('arabic', ''))}</p>"
+                f"<p class='daily-text'>{escape(ayah.get('english', ''))}</p>"
+                f"<div class='daily-source'>Source: {escape(ayah.get('source', 'Fallback'))}</div>"
                 "</div>"
             ),
             unsafe_allow_html=True,
@@ -504,8 +602,10 @@ def front_daily_cards() -> None:
             (
                 "<div class='daily-card'>"
                 "<p class='daily-title'>Hadees of the Day</p>"
-                f"<div class='daily-ref'>{hadith['ref']}</div>"
-                f"<p class='daily-text'>{hadith['text']}</p>"
+                f"<div class='daily-ref'>{escape(hadith.get('ref', 'Hadith'))}</div>"
+                f"<p class='daily-arabic'>{escape(hadith.get('arabic', ''))}</p>"
+                f"<p class='daily-text'>{escape(hadith.get('english', ''))}</p>"
+                f"<div class='daily-source'>Source: {escape(hadith.get('source', 'Fallback'))}</div>"
                 "</div>"
             ),
             unsafe_allow_html=True,
