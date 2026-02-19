@@ -168,6 +168,31 @@ def apply_styles() -> None:
           border-radius: 12px;
           padding: .8rem;
         }
+        .daily-card {
+          background: linear-gradient(135deg, rgba(255,255,255,0.92), rgba(255,250,242,0.90));
+          border: 1px solid rgba(28,36,30,0.14);
+          border-radius: 14px;
+          padding: 1rem;
+          min-height: 170px;
+          box-shadow: 0 10px 20px rgba(25, 42, 33, 0.06);
+        }
+        .daily-title {
+          margin: 0 0 .4rem 0;
+          color: #1f3b2e;
+          font-size: 1rem;
+          font-weight: 700;
+        }
+        .daily-ref {
+          color: #5a655f;
+          font-size: .88rem;
+          margin-bottom: .4rem;
+        }
+        .daily-text {
+          color: #37433e;
+          line-height: 1.5;
+          font-size: .95rem;
+          margin: 0;
+        }
         .stMetric {
           background: rgba(255,255,255,0.82);
           border: 1px solid rgba(28,36,30,0.14);
@@ -399,6 +424,33 @@ def top_section() -> None:
     )
 
 
+def front_daily_cards() -> None:
+    ayah, hadith = daily_content()
+    c1, c2 = st.columns(2)
+    with c1:
+        st.markdown(
+            (
+                "<div class='daily-card'>"
+                "<p class='daily-title'>Ayat of the Day</p>"
+                f"<div class='daily-ref'>{ayah['ref']}</div>"
+                f"<p class='daily-text'>{ayah['text']}</p>"
+                "</div>"
+            ),
+            unsafe_allow_html=True,
+        )
+    with c2:
+        st.markdown(
+            (
+                "<div class='daily-card'>"
+                "<p class='daily-title'>Hadees of the Day</p>"
+                f"<div class='daily-ref'>{hadith['ref']}</div>"
+                f"<p class='daily-text'>{hadith['text']}</p>"
+                "</div>"
+            ),
+            unsafe_allow_html=True,
+        )
+
+
 def deeds_tab(conn: sqlite3.Connection, user_name: str, df: pd.DataFrame) -> None:
     st.subheader("Collective Deeds")
     st.caption("Choose step size, then tap category button. Chart updates instantly.")
@@ -529,12 +581,11 @@ def main() -> None:
     st.set_page_config(page_title=APP_TITLE, page_icon="🤲", layout="wide")
     apply_styles()
 
-    cookies = cookie_manager()
-    access_gate(cookies)
-    user_name = get_display_name(cookies)
+    user_name = "Family"
     conn = get_conn()
 
     top_section()
+    front_daily_cards()
     show_reminder(conn, user_name)
     df = fetch_df(conn)
     tabs = st.tabs(["Deeds", "Sadaqah", "Daily Content", "Settings"])
