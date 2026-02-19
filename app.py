@@ -37,25 +37,25 @@ AYAT_OPTIONS = [
         "ref": "Qur'an 2:286",
         "arabic": "لَا يُكَلِّفُ اللَّهُ نَفْسًا إِلَّا وُسْعَهَا",
         "english": "Allah does not burden a soul beyond that it can bear.",
-        "source": "Fallback",
+        "source": "Curated Backup",
     },
     {
         "ref": "Qur'an 13:28",
         "arabic": "أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ",
         "english": "Verily, in the remembrance of Allah do hearts find rest.",
-        "source": "Fallback",
+        "source": "Curated Backup",
     },
     {
         "ref": "Qur'an 94:5-6",
         "arabic": "فَإِنَّ مَعَ الْعُسْرِ يُسْرًا ۝ إِنَّ مَعَ الْعُسْرِ يُسْرًا",
         "english": "Indeed, with hardship comes ease. Indeed, with hardship comes ease.",
-        "source": "Fallback",
+        "source": "Curated Backup",
     },
     {
         "ref": "Qur'an 14:7",
         "arabic": "لَئِن شَكَرْتُمْ لَأَزِيدَنَّكُمْ",
         "english": "If you are grateful, I will surely increase you.",
-        "source": "Fallback",
+        "source": "Curated Backup",
     },
 ]
 
@@ -64,25 +64,25 @@ HADITH_OPTIONS = [
         "ref": "Sahih Bukhari & Sahih Muslim",
         "arabic": "إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ",
         "english": "Actions are judged by intentions.",
-        "source": "Fallback",
+        "source": "Curated Backup",
     },
     {
         "ref": "Sahih Bukhari & Sahih Muslim",
         "arabic": "مَنْ كَانَ يُؤْمِنُ بِاللَّهِ وَالْيَوْمِ الآخِرِ فَلْيَقُلْ خَيْرًا أَوْ لِيَصْمُتْ",
         "english": "Whoever believes in Allah and the Last Day should speak good or remain silent.",
-        "source": "Fallback",
+        "source": "Curated Backup",
     },
     {
         "ref": "Sahih Muslim",
         "arabic": "لَا يُؤْمِنُ أَحَدُكُمْ حَتَّى يُحِبَّ لِأَخِيهِ مَا يُحِبُّ لِنَفْسِهِ",
         "english": "None of you truly believes until he loves for his brother what he loves for himself.",
-        "source": "Fallback",
+        "source": "Curated Backup",
     },
     {
         "ref": "Sahih Bukhari & Sahih Muslim",
         "arabic": "لَيْسَ الشَّدِيدُ بِالصُّرَعَةِ، إِنَّمَا الشَّدِيدُ الَّذِي يَمْلِكُ نَفْسَهُ عِنْدَ الغَضَبِ",
         "english": "The strong person is the one who controls himself when angry.",
-        "source": "Fallback",
+        "source": "Curated Backup",
     },
 ]
 
@@ -590,7 +590,7 @@ def front_daily_cards() -> None:
                 f"<div class='daily-ref'>{escape(ayah.get('ref', 'Quran'))}</div>"
                 f"<p class='daily-arabic'>{escape(ayah.get('arabic', ''))}</p>"
                 f"<p class='daily-text'>{escape(ayah.get('english', ''))}</p>"
-                f"<div class='daily-source'>Source: {escape(ayah.get('source', 'Fallback'))}</div>"
+                f"<div class='daily-source'>Source: {escape(ayah.get('source', 'Curated Backup'))}</div>"
                 "</div>"
             ),
             unsafe_allow_html=True,
@@ -603,7 +603,7 @@ def front_daily_cards() -> None:
                 f"<div class='daily-ref'>{escape(hadith.get('ref', 'Hadith'))}</div>"
                 f"<p class='daily-arabic'>{escape(hadith.get('arabic', ''))}</p>"
                 f"<p class='daily-text'>{escape(hadith.get('english', ''))}</p>"
-                f"<div class='daily-source'>Source: {escape(hadith.get('source', 'Fallback'))}</div>"
+                f"<div class='daily-source'>Source: {escape(hadith.get('source', 'Curated Backup'))}</div>"
                 "</div>"
             ),
             unsafe_allow_html=True,
