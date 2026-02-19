@@ -27,7 +27,7 @@ DEED_CATEGORIES = [
 SADAQAH_CATEGORY = "Sadaqah"
 CATEGORY_LABELS = {
     "Zikr": "Zikr",
-    "Quran Recitation / Verses": "Quran Recitation",
+    "Quran Recitation / Verses": "Quran",
     "Ahadith": "Ahadith",
     "Other Good Deeds": "Good Deeds",
 }
@@ -694,7 +694,7 @@ def deeds_tab(conn: sqlite3.Connection, user_name: str, df: pd.DataFrame) -> Non
         x=alt.X(
             "Label:N",
             sort=[CATEGORY_LABELS[c] for c in DEED_CATEGORIES],
-            axis=alt.Axis(labelAngle=0, title=None, labelLimit=220),
+            axis=alt.Axis(labelAngle=0, title=None, labelLimit=160, labelFontSize=12, labelPadding=8),
         ),
         y=alt.Y("Total:Q", title=None, axis=alt.Axis(grid=True)),
         color=alt.Color("Color:N", scale=None, legend=None),
@@ -713,21 +713,24 @@ def deeds_tab(conn: sqlite3.Connection, user_name: str, df: pd.DataFrame) -> Non
         use_container_width=True,
     )
 
-    cols = st.columns(len(DEED_CATEGORIES))
-    for col, category in zip(cols, DEED_CATEGORIES):
-        with col:
-            icon = CATEGORY_META[category]["icon"]
-            st.markdown(
-                "<div class='deed-chip'>"
-                f"<p class='deed-chip-title'>{icon} {category}</p>"
-                f"<p class='deed-chip-total'>Total: {counts.get(category, 0)}</p>"
-                "</div>",
-                unsafe_allow_html=True,
-            )
-            if st.button(f"+{step}", key=f"btn-{category}", use_container_width=True):
-                add_entry(conn, user_name, category, int(step), 0, "")
-                st.toast(f"{icon} {category} +{step}")
-                st.rerun()
+    st.markdown("#### Quick Add")
+    for i in range(0, len(DEED_CATEGORIES), 2):
+        row = DEED_CATEGORIES[i : i + 2]
+        cols = st.columns(2)
+        for j, category in enumerate(row):
+            with cols[j]:
+                icon = CATEGORY_META[category]["icon"]
+                st.markdown(
+                    "<div class='deed-chip'>"
+                    f"<p class='deed-chip-title'>{icon} {CATEGORY_LABELS[category]}</p>"
+                    f"<p class='deed-chip-total'>Total: {counts.get(category, 0)}</p>"
+                    "</div>",
+                    unsafe_allow_html=True,
+                )
+                if st.button(f"+{step} {CATEGORY_LABELS[category]}", key=f"btn-{category}", use_container_width=True):
+                    add_entry(conn, user_name, category, int(step), 0, "")
+                    st.toast(f"{icon} {CATEGORY_LABELS[category]} +{step}")
+                    st.rerun()
 
 
 def sadaqah_tab(conn: sqlite3.Connection, user_name: str, df: pd.DataFrame) -> None:
