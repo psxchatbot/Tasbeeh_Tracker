@@ -16,6 +16,7 @@ import streamlit as st
 
 APP_TITLE = "Tasbeeh Tracker"
 DB_PATH = Path(__file__).parent / "data" / "tasbeeh_tracker.db"
+DEFAULT_HADITH_API_KEY = "$2y$10$4rTM9bbsY1QuH0HE2W0gufDS33KuX32Kdi50kfx9v9LJHyA2K2y"
 
 DEED_CATEGORIES = [
     "Zikr",
@@ -483,10 +484,9 @@ def first_non_empty(obj: dict, keys: list[str]) -> str:
 
 
 def fetch_hadith_of_day() -> dict[str, str]:
-    api_key = str(st.secrets.get("HADITH_API_KEY", "")).strip()
+    api_key = str(st.secrets.get("HADITH_API_KEY", DEFAULT_HADITH_API_KEY)).strip()
     if not api_key:
-        idx_hadith = (date.today().toordinal() * 3) % len(HADITH_OPTIONS)
-        return HADITH_OPTIONS[idx_hadith]
+        return random.choice(HADITH_OPTIONS)
 
     base = str(st.secrets.get("HADITH_API_BASE_URL", "https://hadithapi.com/api")).rstrip("/")
 
