@@ -3,6 +3,7 @@ from __future__ import annotations
 import sqlite3
 from datetime import date, datetime
 import json
+import random
 from html import escape
 from pathlib import Path
 from urllib.error import URLError
@@ -429,8 +430,8 @@ def fetch_json(url: str) -> dict:
 
 
 def fetch_ayah_of_day() -> dict[str, str]:
-    # 1..6236 keeps daily selection deterministic.
-    ayah_number = (date.today().toordinal() % 6236) + 1
+    # Random ayah on each app load.
+    ayah_number = random.SystemRandom().randint(1, 6236)
     url = f"https://api.alquran.cloud/v1/ayah/{ayah_number}/editions/quran-uthmani,en.asad"
     payload = fetch_json(url)
     data = payload.get("data", []) if isinstance(payload, dict) else []
@@ -470,8 +471,7 @@ def fetch_ayah_of_day() -> dict[str, str]:
             "source": "AlQuran.cloud",
         }
 
-    idx_ayah = date.today().toordinal() % len(AYAT_OPTIONS)
-    return AYAT_OPTIONS[idx_ayah]
+    return random.choice(AYAT_OPTIONS)
 
 
 def first_non_empty(obj: dict, keys: list[str]) -> str:
@@ -519,8 +519,7 @@ def fetch_hadith_of_day() -> dict[str, str]:
             if not entries:
                 continue
 
-            idx = date.today().toordinal() % len(entries)
-            chosen = entries[idx]
+            chosen = random.SystemRandom().choice(entries)
             english = first_non_empty(
                 chosen,
                 [
@@ -555,8 +554,7 @@ def fetch_hadith_of_day() -> dict[str, str]:
             if english and arabic:
                 return {"ref": source, "arabic": arabic, "english": english, "source": "HadithAPI"}
 
-    idx_hadith = (date.today().toordinal() * 3) % len(HADITH_OPTIONS)
-    return HADITH_OPTIONS[idx_hadith]
+    return random.choice(HADITH_OPTIONS)
 
 
 def top_section() -> None:
