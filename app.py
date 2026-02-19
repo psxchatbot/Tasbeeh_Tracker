@@ -23,41 +23,17 @@ CATEGORIES = [
 ]
 
 AYAT_OPTIONS = [
-    {
-        "ref": "Qur'an 2:286",
-        "text": "Allah does not burden a soul beyond that it can bear.",
-    },
-    {
-        "ref": "Qur'an 13:28",
-        "text": "Verily, in the remembrance of Allah do hearts find rest.",
-    },
-    {
-        "ref": "Qur'an 94:5-6",
-        "text": "Indeed, with hardship comes ease. Indeed, with hardship comes ease.",
-    },
-    {
-        "ref": "Qur'an 14:7",
-        "text": "If you are grateful, I will surely increase you.",
-    },
+    {"ref": "Qur'an 2:286", "text": "Allah does not burden a soul beyond that it can bear."},
+    {"ref": "Qur'an 13:28", "text": "Verily, in the remembrance of Allah do hearts find rest."},
+    {"ref": "Qur'an 94:5-6", "text": "Indeed, with hardship comes ease. Indeed, with hardship comes ease."},
+    {"ref": "Qur'an 14:7", "text": "If you are grateful, I will surely increase you."},
 ]
 
 HADITH_OPTIONS = [
-    {
-        "ref": "Sahih Muslim",
-        "text": "The most beloved deeds to Allah are those done regularly, even if small.",
-    },
-    {
-        "ref": "Sahih Bukhari",
-        "text": "The believer's shade on the Day of Resurrection will be his charity.",
-    },
-    {
-        "ref": "Riyad as-Salihin",
-        "text": "Whoever guides to good will have a reward like the doer of it.",
-    },
-    {
-        "ref": "Sahih Muslim",
-        "text": "Supplication for your brother in his absence is answered.",
-    },
+    {"ref": "Sahih Muslim", "text": "The most beloved deeds to Allah are those done regularly, even if small."},
+    {"ref": "Sahih Bukhari", "text": "The believer's shade on the Day of Resurrection will be his charity."},
+    {"ref": "Riyad as-Salihin", "text": "Whoever guides to good will have a reward like the doer of it."},
+    {"ref": "Sahih Muslim", "text": "Supplication for your brother in his absence is answered."},
 ]
 
 RENOWNED_HADITH = [
@@ -100,50 +76,32 @@ def get_conn() -> sqlite3.Connection:
 
 
 def ensure_schema(conn: sqlite3.Connection) -> None:
-    cols = {
-        row[1] for row in conn.execute("PRAGMA table_info(contributions)").fetchall()
-    }
+    cols = {row[1] for row in conn.execute("PRAGMA table_info(contributions)").fetchall()}
     if not cols:
         return
 
     if "entered_by" not in cols:
-        # Old schema used `member`; map it into the new `entered_by`.
         conn.execute("ALTER TABLE contributions ADD COLUMN entered_by TEXT")
         if "member" in cols:
-            conn.execute(
-                "UPDATE contributions SET entered_by = COALESCE(entered_by, member, 'Family')"
-            )
+            conn.execute("UPDATE contributions SET entered_by = COALESCE(entered_by, member, 'Family')")
         else:
-            conn.execute(
-                "UPDATE contributions SET entered_by = COALESCE(entered_by, 'Family')"
-            )
+            conn.execute("UPDATE contributions SET entered_by = COALESCE(entered_by, 'Family')")
 
     if "category" not in cols:
-        # Old schema used `type`; map it into the new `category`.
         conn.execute("ALTER TABLE contributions ADD COLUMN category TEXT")
         if "type" in cols:
-            conn.execute(
-                "UPDATE contributions SET category = COALESCE(category, type, 'Other Good Deeds')"
-            )
+            conn.execute("UPDATE contributions SET category = COALESCE(category, type, 'Other Good Deeds')")
         else:
-            conn.execute(
-                "UPDATE contributions SET category = COALESCE(category, 'Other Good Deeds')"
-            )
-
-    if "amount_pkr" not in cols:
-        conn.execute(
-            "ALTER TABLE contributions ADD COLUMN amount_pkr INTEGER NOT NULL DEFAULT 0"
-        )
+            conn.execute("UPDATE contributions SET category = COALESCE(category, 'Other Good Deeds')")
 
     if "count" not in cols:
         conn.execute("ALTER TABLE contributions ADD COLUMN count INTEGER NOT NULL DEFAULT 1")
 
-    conn.execute(
-        "UPDATE contributions SET entered_by = COALESCE(NULLIF(TRIM(entered_by), ''), 'Family')"
-    )
-    conn.execute(
-        "UPDATE contributions SET category = COALESCE(NULLIF(TRIM(category), ''), 'Other Good Deeds')"
-    )
+    if "amount_pkr" not in cols:
+        conn.execute("ALTER TABLE contributions ADD COLUMN amount_pkr INTEGER NOT NULL DEFAULT 0")
+
+    conn.execute("UPDATE contributions SET entered_by = COALESCE(NULLIF(TRIM(entered_by), ''), 'Family')")
+    conn.execute("UPDATE contributions SET category = COALESCE(NULLIF(TRIM(category), ''), 'Other Good Deeds')")
     conn.commit()
 
 
@@ -157,11 +115,11 @@ def apply_styles() -> None:
           font-family: 'Inter', sans-serif;
         }
         .hero {
-          background: rgba(255,255,255,0.78);
-          border: 1px solid rgba(28,36,30,0.14);
+          background: rgba(255,255,255,0.80);
+          border: 1px solid rgba(28,36,30,0.15);
           border-radius: 16px;
-          padding: 1rem 1rem;
-          margin-bottom: .8rem;
+          padding: 1rem;
+          margin-bottom: .9rem;
         }
         .hero-title {
           color: #1b3628;
@@ -179,13 +137,22 @@ def apply_styles() -> None:
           color: #3e342a;
           line-height: 1.55;
         }
+        .cat-box {
+          background: rgba(255,255,255,0.86);
+          border: 1px solid rgba(27,54,40,0.14);
+          border-radius: 12px;
+          padding: .75rem .8rem;
+          margin-bottom: .45rem;
+          min-height: 84px;
+        }
+        .cat-title { margin: 0; color: #183327; font-size: 1rem; font-weight: 700; }
+        .cat-total { margin: .2rem 0 0; color: #51605a; font-size: .9rem; }
         .card {
-          background: rgba(255,255,255,0.80);
+          background: rgba(255,255,255,0.82);
           border: 1px solid rgba(28,36,30,0.12);
           border-radius: 12px;
           padding: .8rem;
         }
-        .small { color: #58645f; font-size: .9rem; }
         .stMetric {
           background: rgba(255,255,255,0.82);
           border: 1px solid rgba(28,36,30,0.14);
@@ -210,19 +177,14 @@ def access_gate(cookies: stx.CookieManager) -> None:
     if not required_code:
         return
 
-    remembered = cookies.get(ACCESS_COOKIE)
-    if remembered == "ok":
+    if cookies.get(ACCESS_COOKIE) == "ok":
         return
 
     st.sidebar.subheader("Family Access")
     code = st.sidebar.text_input("Enter family code", type="password")
     if st.sidebar.button("Unlock", use_container_width=True):
         if code == required_code:
-            cookies.set(
-                ACCESS_COOKIE,
-                "ok",
-                expires_at=datetime.utcnow() + timedelta(days=30),
-            )
+            cookies.set(ACCESS_COOKIE, "ok", expires_at=datetime.utcnow() + timedelta(days=30))
             st.rerun()
         st.sidebar.error("Incorrect access code")
 
@@ -253,22 +215,11 @@ def get_display_name(cookies: stx.CookieManager) -> str:
     return final_name
 
 
-def add_entry(
-    conn: sqlite3.Connection,
-    entered_by: str,
-    category: str,
-    count: int,
-    amount_pkr: int,
-    note: str,
-) -> None:
-    table_cols = {
-        row[1] for row in conn.execute("PRAGMA table_info(contributions)").fetchall()
-    }
-
+def add_entry(conn: sqlite3.Connection, entered_by: str, category: str, count: int, amount_pkr: int, note: str) -> None:
+    table_cols = {row[1] for row in conn.execute("PRAGMA table_info(contributions)").fetchall()}
     insert_cols: list[str] = ["created_at"]
     insert_vals: list[object] = [datetime.utcnow().isoformat()]
 
-    # New schema columns
     if "entered_by" in table_cols:
         insert_cols.append("entered_by")
         insert_vals.append(entered_by)
@@ -295,10 +246,7 @@ def add_entry(
 
     placeholders = ", ".join(["?"] * len(insert_cols))
     cols_sql = ", ".join(insert_cols)
-    conn.execute(
-        f"INSERT INTO contributions ({cols_sql}) VALUES ({placeholders})",
-        tuple(insert_vals),
-    )
+    conn.execute(f"INSERT INTO contributions ({cols_sql}) VALUES ({placeholders})", tuple(insert_vals))
     conn.commit()
 
 
@@ -311,6 +259,14 @@ def fetch_df(conn: sqlite3.Connection) -> pd.DataFrame:
         """,
         conn,
     )
+
+
+def category_count_map(df: pd.DataFrame) -> dict[str, int]:
+    if df.empty:
+        return {cat: 0 for cat in CATEGORIES}
+    summary = df.groupby("category", as_index=False)["count"].sum()
+    counts = {row["category"]: int(row["count"]) for _, row in summary.iterrows()}
+    return {cat: counts.get(cat, 0) for cat in CATEGORIES}
 
 
 def get_pref(conn: sqlite3.Connection, user_name: str) -> tuple[str, str]:
@@ -343,8 +299,8 @@ def show_reminder(conn: sqlite3.Connection, user_name: str) -> None:
         "SELECT created_at FROM contributions WHERE entered_by = ? ORDER BY created_at DESC LIMIT 1",
         (user_name,),
     ).fetchone()
-
     today = date.today()
+
     if row:
         last_date = datetime.fromisoformat(str(row[0])).date()
         if last_date < today:
@@ -381,59 +337,56 @@ def top_section() -> None:
     )
 
 
-def log_tab(conn: sqlite3.Connection, user_name: str) -> None:
-    st.subheader("Add Deeds (Collective)")
-    st.caption("Only family total is shown. Individual breakdown is hidden.")
+def quick_add_section(conn: sqlite3.Connection, user_name: str, df: pd.DataFrame) -> None:
+    st.subheader("Quick Add (Collective)")
+    st.caption("Tap one button per category. Each tap adds +1.")
 
-    tabs = st.tabs(CATEGORIES)
+    counts = category_count_map(df)
+    max_total = max(max(counts.values()), 1)
 
-    for idx, category in enumerate(CATEGORIES):
-        with tabs[idx]:
-            quick = st.columns(3)
-            if quick[0].button("+1", key=f"{category}-q1", use_container_width=True):
-                add_entry(conn, user_name, category, 1, 0, "")
-                st.success("Added +1")
-                st.rerun()
-            if quick[1].button("+5", key=f"{category}-q5", use_container_width=True):
-                add_entry(conn, user_name, category, 5, 0, "")
-                st.success("Added +5")
-                st.rerun()
-            if quick[2].button("+10", key=f"{category}-q10", use_container_width=True):
-                add_entry(conn, user_name, category, 10, 0, "")
-                st.success("Added +10")
-                st.rerun()
+    chart_rows = pd.DataFrame(
+        {"Category": CATEGORIES, "Total": [counts[cat] for cat in CATEGORIES]}
+    ).set_index("Category")
+    st.bar_chart(chart_rows, y="Total", use_container_width=True)
 
-            with st.form(f"form-{category}", clear_on_submit=True):
-                count = st.number_input(
-                    f"Custom count for {category}",
-                    min_value=1,
-                    max_value=10000,
-                    value=1,
-                    step=1,
-                    key=f"count-{category}",
+    for i in range(0, len(CATEGORIES), 2):
+        row_cats = CATEGORIES[i : i + 2]
+        cols = st.columns(len(row_cats))
+        for col, category in zip(cols, row_cats):
+            with col:
+                st.markdown(
+                    "<div class='cat-box'>"
+                    f"<p class='cat-title'>{category}</p>"
+                    f"<p class='cat-total'>Total: {counts.get(category, 0)}</p>"
+                    "</div>",
+                    unsafe_allow_html=True,
                 )
-                amount_pkr = 0
-                if category == "Sadaqah":
-                    amount_pkr = st.number_input(
-                        "Sadaqah amount in PKR",
-                        min_value=1,
-                        max_value=100000000,
-                        value=100,
-                        step=50,
-                        key="sadaqah-pkr",
-                    )
-                note = st.text_input("Optional note", key=f"note-{category}")
-                submitted = st.form_submit_button("Add", use_container_width=True)
-
-                if submitted:
-                    add_entry(conn, user_name, category, int(count), int(amount_pkr), note)
-                    st.success("Contribution added.")
+                st.progress(min(counts.get(category, 0) / max_total, 1.0))
+                if st.button(f"+1 {category}", key=f"btn-{category}", use_container_width=True):
+                    add_entry(conn, user_name, category, 1, 0, "")
                     st.rerun()
 
+    st.markdown("### Add Sadaqah (PKR)")
+    with st.form("sadaqah-pkr-form", clear_on_submit=True):
+        amount_pkr = st.number_input(
+            "Amount (PKR)",
+            min_value=1,
+            max_value=100000000,
+            value=100,
+            step=50,
+        )
+        note = st.text_input("Optional note")
+        submitted = st.form_submit_button("Add Sadaqah PKR", use_container_width=True)
+        if submitted:
+            add_entry(conn, user_name, "Sadaqah", 1, int(amount_pkr), note)
+            st.success("Sadaqah added.")
+            st.rerun()
 
-def dashboard_tab(df: pd.DataFrame) -> None:
+
+def dashboard_section(df: pd.DataFrame) -> None:
+    st.subheader("Collective Dashboard")
     if df.empty:
-        st.info("No entries yet. Add your first contribution.")
+        st.info("No entries yet. Add the first contribution above.")
         return
 
     total_count = int(df["count"].sum())
@@ -446,54 +399,45 @@ def dashboard_tab(df: pd.DataFrame) -> None:
     m2.metric("Sadaqah (PKR)", f"{total_sadaqah_pkr:,}")
     m3.metric("Today Added", f"{today_count}")
 
-    st.subheader("Category Totals")
     summary = (
         df.groupby("category", as_index=False)[["count", "amount_pkr"]]
         .sum()
         .sort_values("count", ascending=False)
     )
     summary["amount_pkr"] = summary["amount_pkr"].astype(int)
-    st.dataframe(summary, use_container_width=True, hide_index=True)
 
-    st.subheader("Recent Collective Activity")
+    st.markdown("#### Category Progress")
+    st.bar_chart(summary.set_index("category"), y="count", use_container_width=True)
+
+    st.markdown("#### Recent Collective Activity")
     recent = df[["created_at", "category", "count", "amount_pkr", "note"]].copy()
     recent["created_at"] = pd.to_datetime(recent["created_at"], utc=True).dt.strftime("%Y-%m-%d %H:%M UTC")
-    st.dataframe(recent.head(30), use_container_width=True, hide_index=True)
+    st.dataframe(recent.head(20), use_container_width=True, hide_index=True)
 
 
-def inspiration_tab() -> None:
+def inspiration_section() -> None:
     ayah, hadith = daily_content()
-
-    st.markdown("### Ayah of the Day")
-    st.markdown(f"<div class='card'><strong>{ayah['ref']}</strong><br/>{ayah['text']}</div>", unsafe_allow_html=True)
-
-    st.markdown("### Hadith of the Day")
-    st.markdown(f"<div class='card'><strong>{hadith['ref']}</strong><br/>{hadith['text']}</div>", unsafe_allow_html=True)
-
-    st.markdown("### Renowned Ahadith")
+    st.subheader("Daily Inspiration")
+    st.markdown(f"<div class='card'><strong>Ayah of the Day ({ayah['ref']})</strong><br/>{ayah['text']}</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='card'><strong>Hadith of the Day ({hadith['ref']})</strong><br/>{hadith['text']}</div>", unsafe_allow_html=True)
+    st.markdown("#### Renowned Ahadith")
     for item in RENOWNED_HADITH:
         st.markdown(f"- {item}")
 
 
-def settings_tab(conn: sqlite3.Connection, user_name: str) -> None:
+def settings_section(conn: sqlite3.Connection, user_name: str) -> None:
     st.subheader("Reminder Settings")
-    st.caption("Notifications are in-app reminders when you open this app.")
-    rt, rx = get_pref(conn, user_name)
+    st.caption("In-app reminder appears when you open the app.")
 
+    rt, rx = get_pref(conn, user_name)
     with st.form("settings-form"):
         reminder_time = st.text_input("Preferred reminder time (24h)", value=rt, help="Example: 20:30")
         reminder_text = st.text_input("Reminder text", value=rx)
         save = st.form_submit_button("Save Reminder", use_container_width=True)
-
         if save:
             clean_text = reminder_text.strip() or "Take 5 minutes today for tasbeeh, zikr, or recitation."
             save_pref(conn, user_name, reminder_time.strip() or "20:00", clean_text)
             st.success("Reminder settings saved.")
-
-    st.subheader("Privacy")
-    st.markdown("- This app shows collective totals only.")
-    st.markdown("- Name is saved only to recognize your own entries.")
-    st.markdown("- For long-term stable cloud storage, move to Supabase.")
 
 
 def main() -> None:
@@ -507,18 +451,16 @@ def main() -> None:
 
     top_section()
     show_reminder(conn, user_name)
-
     df = fetch_df(conn)
 
-    tab1, tab2, tab3, tab4 = st.tabs(["Log", "Dashboard", "Daily", "Settings"])
-    with tab1:
-        log_tab(conn, user_name)
-    with tab2:
-        dashboard_tab(df)
-    with tab3:
-        inspiration_tab()
-    with tab4:
-        settings_tab(conn, user_name)
+    quick_add_section(conn, user_name, df)
+    st.divider()
+    dashboard_section(fetch_df(conn))
+
+    with st.expander("Daily Content", expanded=False):
+        inspiration_section()
+    with st.expander("Settings", expanded=False):
+        settings_section(conn, user_name)
 
 
 if __name__ == "__main__":
