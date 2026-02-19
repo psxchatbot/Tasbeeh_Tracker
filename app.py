@@ -8,7 +8,7 @@ from html import escape
 from pathlib import Path
 from urllib.error import URLError
 from urllib.parse import urlencode
-from urllib.request import urlopen
+from urllib.request import Request, urlopen
 
 import altair as alt
 import pandas as pd
@@ -460,7 +460,14 @@ def refresh_daily_content() -> None:
 
 def fetch_json(url: str) -> dict:
     try:
-        with urlopen(url, timeout=10) as response:
+        req = Request(
+            url,
+            headers={
+                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+                "Accept": "application/json",
+            },
+        )
+        with urlopen(req, timeout=20) as response:
             return json.loads(response.read().decode("utf-8"))
     except (URLError, TimeoutError, json.JSONDecodeError):
         return {}
@@ -519,6 +526,23 @@ def first_non_empty(obj: dict, keys: list[str]) -> str:
     return ""
 
 
+def hadith_source_label(chosen: dict) -> str:
+    source = first_non_empty(chosen, ["bookName", "collection", "source", "chapterEnglish"])
+    book_obj = chosen.get("book")
+    if not source and isinstance(book_obj, dict):
+        source = first_non_empty(book_obj, ["bookName", "writerName", "bookSlug"])
+    if not source:
+        source = first_non_empty(chosen, ["bookSlug"]) or "Hadith API"
+
+    hadith_no = first_non_empty(
+        chosen,
+        ["hadithNumber", "hadith_number", "number", "hadithNo"],
+    )
+    if hadith_no:
+        source = f"{source} #{hadith_no}"
+    return source
+
+
 def fetch_hadith_of_day() -> dict[str, str]:
     try:
         api_key = str(st.secrets.get("HADITH_API_KEY", DEFAULT_HADITH_API_KEY)).strip()
@@ -532,11 +556,12 @@ def fetch_hadith_of_day() -> dict[str, str]:
     except Exception:
         base = "https://hadithapi.com/api"
 
+    random_page = random.SystemRandom().randint(1, 40000)
     query_sets = [
-        {"apiKey": api_key, "paginate": "1"},
-        {"api_key": api_key, "paginate": "1"},
-        {"apiKey": api_key},
-        {"api_key": api_key},
+        {"apiKey": api_key, "paginate": "1", "page": str(random_page)},
+        {"api_key": api_key, "paginate": "1", "page": str(random_page)},
+        {"apiKey": api_key, "page": str(random_page)},
+        {"api_key": api_key, "page": str(random_page)},
     ]
     paths = ["/hadiths", "/hadith", "/books"]
 
@@ -582,16 +607,7 @@ def fetch_hadith_of_day() -> dict[str, str]:
                     "hadithArabicText",
                 ],
             )
-            source = first_non_empty(
-                chosen,
-                ["book", "bookName", "collection", "source", "chapterEnglish"],
-            ) or "Hadith API"
-            hadith_no = first_non_empty(
-                chosen,
-                ["hadithNumber", "hadith_number", "number", "hadithNo"],
-            )
-            if hadith_no:
-                source = f"{source} #{hadith_no}"
+            source = hadith_source_label(chosen)
 
             if english and arabic:
                 return {"ref": source, "arabic": arabic, "english": english, "source": "HadithAPI"}
